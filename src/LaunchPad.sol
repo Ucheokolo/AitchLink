@@ -1,49 +1,82 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-// import "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
-// contract LaunchPad {
-//     address owner;
-//     uint private totalPoolToken;
-//     address[] public lauchpadParticipants;
-//     uint public minimumAmt = 0.1 ether;
-//     mapping(address => bool) public participated;
+contract LaunchPad {
+    address public factoryOwner;
+    address public launchPadCreator;
+    address public launchPadToken;
+    string public tokenName;
+    uint public launchPadID;
+    mapping(address => bool) public launchPadParticipant;
+    uint public launchPadTokenSupply;
+    uint public minimumAmt = 0.01 ether;
 
-//     struct launchDetails {
-//         uint startTime;
-//         uint duration;
-//         uint endLaunch;
-//         bool inProgress;
-//     }
+    enum status{
+        processing,
+        active,
+        concluded,
+        canceled,
+        suspended
+    }
 
-//     launchDetails public launchpad;
+    struct launchpadDetails {
+        uint id;
+        address token;
+        uint totalSupply;
+        uint proposalTime;
+        uint launchStart;
+        uint duration;
+        uint launchEnd;
+        status launchpadStatus;
+    }
+    uint public launchID;
+    mapping(address => launchpadDetails) public launchpadDetail;
 
-//     constructor() ERC20("Ogeni", "OGN") {
-//         owner = msg.sender;
-//     }
+    constructor(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner) {
+        factoryOwner = _factoryOwner;
+        // factoryAddr = address(this); // get this from factory contract(this will hold transferred launchpad token)
+        launchPadCreator = msg.sender; // msg.sender calling the function in factory
+        launchPadToken = _tokenAddr;
+        launchPadTokenSupply = _Amount;
+        tokenName = _tokenName;
+        launchID = launchID + 1; // this should be implemented in factory contract
+        proposeStart();
+        IERC20(_tokenAddr).transferFrom(msg.sender, address(this), _Amount);
 
-//     modifier onlyOwner() {
-//         require(msg.sender == owner, "Only owner can call this function");
-//         _;
-//     }
+    }
 
-//     function setTokenDistribution(
-//         uint _amount
-//     ) public onlyOwner returns (uint) {
-//         totalPoolToken = _amount * 1 ether;
-//     }
+    function creator() view internal{
+        require(msg.sender == launchPadCreator, "Unauthorized Operation");
+    }
 
-//     function startSales() public onlyOwner {
-//         require(totalPoolToken != 0, "Set setTokenDistribution");
-//         launchDetails memory _launch;
-//         _launch.startTime = block.timestamp;
-//         _launch.duration = 3 minutes;
-//         _launch.endLaunch = _launch.startTime + 3 minutes;
-//         _launch.inProgress = true;
+    function admin() view internal {
+        require(msg.sender == factoryOwner, "Unauthorized Operation" );
+    }
 
-//         launchpad = _launch;
-//     }
+    function proposeStart() internal {
+        creator();
+        require(launchPadTokenSupply > 0, "launchPadTokenSupply");
+        launchpadDetails memory _launch;
+        _launch.id = launchID;
+        _launch.token = launchPadToken;
+        _launch.proposalTime = block.timestamp;
+        _launch.launchpadStatus = status.processing;
+        launchpadDetail[launchPadToken] = _launch;
+    }
+
+    function activateLaunchpad() public {
+        admin();
+        launchpadDetails memory _launch;
+        _launch.launchStart = block.timestamp;
+        _launch.duration = 2 days;
+        _launch.launchEnd = block.timestamp + 2 days;
+        _launch.launchpadStatus = status.active;
+
+        launchpadDetail[launchPadToken] = _launch;
+
+    }
 
 //     function launchDeposit() public payable {
 //         require(msg.value > 0, "Insufficient particitpation fund");
@@ -87,4 +120,4 @@ pragma solidity ^0.8.9;
 //         uint equiAmt = msg.value * 1;
 //         return equiAmt;
 //     }
-// }
+}
