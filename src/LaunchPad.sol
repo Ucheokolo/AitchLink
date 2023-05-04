@@ -35,16 +35,24 @@ contract LaunchPad {
     uint public launchID;
     mapping(address => launchpadDetails) public launchpadDetail;
 
+    // Eth investors
+    mapping(address => bool) public investorEth;
+    mapping(address => uint) public investorAmountEth;
+
+    // Aitch Investors
+    mapping(address => bool) public investorAitch;
+    mapping(address => uint) public investorAmountAitch;
+
     constructor(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner) {
         ethPriceFeed = AggregatorV3Interface(0x1a81afB8146aeFfCFc5E50e8479e826E7D55b910);
         factoryOwner = _factoryOwner;
-        // factoryAddr = address(this); // get this from factory contract(this will hold transferred launchpad token)
         launchPadCreator = msg.sender; // msg.sender calling the function in factory
         launchPadToken = _tokenAddr;
         launchPadTokenSupply = _Amount;
         tokenName = _tokenName;
         launchID = launchID + 1; // this should be implemented in factory contract
-        proposeStart();
+
+        // Move this to router contract
         IERC20(_tokenAddr).transferFrom(msg.sender, address(this), _Amount);
 
     }
@@ -58,10 +66,12 @@ contract LaunchPad {
 
     function proposeStart() internal {
         creator();
+        launchPadTokenSupply = IERC20(launchPadToken).balanceOf(address(this));
         require(launchPadTokenSupply > 0, "launchPadTokenSupply");
         launchpadDetails memory _launch;
         _launch.id = launchID;
         _launch.token = launchPadToken;
+        _launch.totalSupply = launchPadTokenSupply;
         _launch.proposalTime = block.timestamp;
         _launch.launchpadStatus = status.processing;
         launchpadDetail[launchPadToken] = _launch;
@@ -77,32 +87,68 @@ contract LaunchPad {
 
         launchpadDetail[launchPadToken] = _launch;
 
-    }
-
-    function investInLaunchpad() public {
 
     }
 
-//     function launchDeposit() public payable {
-//         require(msg.value > 0, "Insufficient particitpation fund");
-//         require(msg.sender != address(0), "Address zero!!!!");
-//         require(totalPoolToken > 0, "launchPad token exhausted");
-//         require(
-//             msg.value <= totalPoolToken,
-//             "Not enough tokens left, consider reducing purchase amount"
-//         );
-//         if (block.timestamp > launchpad.endLaunch) {
-//             launchpad.inProgress = false;
-//         }
-//         require(launchpad.inProgress == true, "LaunchPad ended");
+    function investWithEth() public payable {
+        
+        require(msg.value > 0, "Insufficient Fund");
+        investConditions();
+        investorEth[msg.sender] = true;
+        investorAmountEth[msg.sender] += msg.value;
 
-//         uint transferAmt = tokenEquivalent();
-//         _mint(msg.sender, transferAmt);
-//         totalPoolToken -= transferAmt;
-//         if (participated[msg.sender] != true) {
-//             lauchpadParticipants.push(msg.sender);
-//         }
-//     }
+    }
+
+    function investWithAitch(uint _amount) public {
+        address aitch = 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
+        require(IERC20(aitch).balanceOf(msg.sender) > 0, "Insufficient Fund");
+        investConditions();
+        IERC20(aitch).transferFrom(msg.sender, address(this), _amount);
+        investorAitch[msg.sender] = true;
+        investorAmountAitch[msg.sender] += _amount;
+    }
+
+    function investConditions() internal {
+        uint startTime = launchpadDetail[launchPadToken].launchStart;
+        uint duration = launchpadDetail[launchPadToken].duration;
+
+        require(msg.sender != launchPadCreator && msg.sender != factoryOwner, "Admins Prohibited");
+
+        require(msg.sender != address(0), "Unauthorized Operation");
+
+        if(launchpadDetail[launchPadToken].launchpadStatus == status.processing) revert("Coming Soon");
+        if(launchpadDetail[launchPadToken].launchpadStatus == status.canceled) revert("launchPad Canceled");
+        if(launchpadDetail[launchPadToken].launchpadStatus == status.suspended) revert("launchPad Suspended");
+
+        if(block.timestamp > startTime + duration){
+            launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
+        }
+        require(launchpadDetail[launchPadToken].launchpadStatus == status.active, "launchpad Concluded");
+    }
+
+    function claimConditions() public {
+        bool ethInvestor = investorEth[msg.sender];
+        uint ethInvAmt = investorAmountEth[msg.sender];
+        uint ethUsd = uint(getEthtPrice());
+        uint usdEquiEth = ethInvAmt * ethUsd;
+
+        bool aitchInvestor = investorAitch[msg.sender];
+        uint aitchInvAmt = investorAmountAitch[msg.sender];
+        uint aitchUsd = getAitchPrice();
+        uint usdEquiAitch = aitchInvAmt * aitchUsd;
+
+        require(ethInvestor == true || aitchInvestor == true, "Unauthorized Person");
+        uint rate = setRate();
+        if(ethInvAmt > 0){
+            
+            uint amtToReceiveEth = (rate * usdEquiEth)/ 10 ** 18;
+        }
+        if(aitchInvAmt > 0){
+            uint amtToReceiveAitch = (rate * usdEquiAitch)/10 ** 18;
+        }
+
+
+    }
 
 //     function retreiveFunds() public payable onlyOwner {
 //         if (block.timestamp > launchpad.endLaunch) {
@@ -126,9 +172,24 @@ contract LaunchPad {
 //         return equiAmt;
 //     }
 
-function setRate() public returns(uint){
+function setRate() view public returns(uint){
+    address aitch = 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
+    // get total ether equivalent in usd
     uint contractEthBal = address(this).balance;
-    // uint contractAitchBal = IERC20();
+    uint ethUsdRate = uint(getEthtPrice());
+    uint totalEthInUsd = contractEthBal * ethUsdRate;
+
+    // get total aitch equvalent in usd
+    uint contractAitchBal = IERC20(aitch).balanceOf(address(this));
+    uint aitchUsdRate = getAitchPrice();
+    uint totalAitchInUsd = (aitchUsdRate * contractAitchBal) / 10 ** 18;
+
+    // get total revenue
+    uint launchPadRevenue = totalEthInUsd + totalAitchInUsd;
+
+    // launchpad token rate
+    uint rate = (launchPadTokenSupply/launchPadRevenue)* (10 ** 18);
+    return rate;
 
 }
 
@@ -144,7 +205,7 @@ function getEthtPrice() internal view returns (int) {
     }
 
     function getAitchPrice() pure internal returns(uint){
-        uint price = 0.33 * 1000;
+        uint price = 0.33 * (10 ** 18);
         return price;
         // when calling this, remember to divide by 1000 to reflect actual value.
     }
