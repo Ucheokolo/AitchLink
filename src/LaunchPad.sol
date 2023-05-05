@@ -108,6 +108,33 @@ contract LaunchPad {
         investorAmountAitch[msg.sender] += _amount;
     }
 
+    function claimTokens() public {
+        require(launchpadDetail[launchPadToken].launchpadStatus == status.concluded || launchpadDetail[launchPadToken].launchpadStatus == status.canceled, "Launchpad In-progress");
+        require(investorEth[msg.sender] == true || investorAitch[msg.sender] == true, "Non-participant");
+        require(msg.sender != factoryOwner || msg.sender != launchPadCreator, "Admins Prohibited");
+
+        if(launchpadDetail[launchPadToken].launchpadStatus == status.concluded){
+        claimConditions();
+        }
+        if(launchpadDetail[launchPadToken].launchpadStatus == status.canceled){
+            retreiveConditions();
+        }
+    }
+
+    function cancelLaunchpad() public {
+        admin();
+        launchpadDetail[launchPadToken].launchpadStatus = status.canceled;
+    }
+
+    function suspendLaunchpad() public {
+        admin();
+        if(launchpadDetail[launchPadToken].launchpadStatus == status.active){
+            launchpadDetail[launchPadToken].launchpadStatus = status.suspended;
+        } else if(launchpadDetail[launchPadToken].launchpadStatus == status.suspended){
+            launchpadDetail[launchPadToken].launchpadStatus = status.active;
+        } else return;
+    }
+
     function investConditions() internal {
         uint startTime = launchpadDetail[launchPadToken].launchStart;
         uint duration = launchpadDetail[launchPadToken].duration;
@@ -126,7 +153,7 @@ contract LaunchPad {
         require(launchpadDetail[launchPadToken].launchpadStatus == status.active, "launchpad Concluded");
     }
 
-    function claimConditions() public {
+    function claimConditions() internal {
         bool ethInvestor = investorEth[msg.sender];
         uint ethInvAmt = investorAmountEth[msg.sender];
         uint ethUsd = uint(getEthtPrice());
@@ -140,39 +167,34 @@ contract LaunchPad {
         require(ethInvestor == true || aitchInvestor == true, "Unauthorized Person");
         uint rate = setRate();
         if(ethInvAmt > 0){
-            
             uint amtToReceiveEth = (rate * usdEquiEth)/ 10 ** 18;
+            IERC20(launchPadToken).transfer(msg.sender, amtToReceiveEth);
         }
         if(aitchInvAmt > 0){
             uint amtToReceiveAitch = (rate * usdEquiAitch)/10 ** 18;
+            IERC20(launchPadToken).transfer(msg.sender, amtToReceiveAitch);
         }
 
 
     }
 
-//     function retreiveFunds() public payable onlyOwner {
-//         if (block.timestamp > launchpad.endLaunch) {
-//             launchpad.inProgress = false;
-//         }
-//         require(launchpad.inProgress == false, "Sales in progress");
-//         uint _amount = withdrawFunds();
-//         (bool sent, bytes memory data) = address(msg.sender).call{
-//             value: _amount
-//         }("");
-//         require(sent, "Failed to send Ether");
-//     }
+    function retreiveConditions() internal{
+        uint ethInvAmt = investorAmountEth[msg.sender];
+        uint aitchInvAmt = investorAmountAitch[msg.sender];
 
-//     function withdrawFunds() internal view returns (uint) {
-//         uint contractBal = address(this).balance;
-//         return contractBal;
-//     }
+        if(ethInvAmt > 0){
+            (bool sent, bytes memory data) = address(msg.sender).call{
+            value: ethInvAmt
+        }("");
+        require(sent, "Failed to send Ether");
+        }
+        if(aitchInvAmt > 0){
+            address aitch = 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
+            IERC20(aitch).transfer(msg.sender, aitchInvAmt);
+        }
+    }
 
-//     function tokenEquivalent() internal returns (uint) {
-//         uint equiAmt = msg.value * 1;
-//         return equiAmt;
-//     }
-
-function setRate() view public returns(uint){
+    function setRate() view internal returns(uint){
     address aitch = 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
     // get total ether equivalent in usd
     uint contractEthBal = address(this).balance;
@@ -190,10 +212,9 @@ function setRate() view public returns(uint){
     // launchpad token rate
     uint rate = (launchPadTokenSupply/launchPadRevenue)* (10 ** 18);
     return rate;
+    }
 
-}
-
-function getEthtPrice() internal view returns (int) {
+    function getEthtPrice() internal view returns (int) {
         (
             /* uint80 roundID */,
             int price,
@@ -209,7 +230,5 @@ function getEthtPrice() internal view returns (int) {
         return price;
         // when calling this, remember to divide by 1000 to reflect actual value.
     }
-
-
 
 }
