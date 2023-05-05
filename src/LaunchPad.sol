@@ -23,7 +23,6 @@ contract LaunchPad {
     }
 
     struct launchpadDetails {
-        uint id;
         address token;
         uint totalSupply;
         uint proposalTime;
@@ -32,7 +31,7 @@ contract LaunchPad {
         uint launchEnd;
         status launchpadStatus;
     }
-    uint public launchID;
+    
     mapping(address => launchpadDetails) public launchpadDetail;
 
     // Eth investors
@@ -50,11 +49,6 @@ contract LaunchPad {
         launchPadToken = _tokenAddr;
         launchPadTokenSupply = _Amount;
         tokenName = _tokenName;
-        launchID = launchID + 1; // this should be implemented in factory contract
-
-        // Move this to router contract
-        IERC20(_tokenAddr).transferFrom(msg.sender, address(this), _Amount);
-
     }
 
     function admin() view internal {
@@ -64,12 +58,11 @@ contract LaunchPad {
         require(msg.sender == launchPadCreator, "Unauthorized Operation");
     }
 
-    function proposeStart() internal {
+    function proposeStart() external {
         creator();
         launchPadTokenSupply = IERC20(launchPadToken).balanceOf(address(this));
         require(launchPadTokenSupply > 0, "launchPadTokenSupply");
         launchpadDetails memory _launch;
-        _launch.id = launchID;
         _launch.token = launchPadToken;
         _launch.totalSupply = launchPadTokenSupply;
         _launch.proposalTime = block.timestamp;
@@ -183,7 +176,7 @@ contract LaunchPad {
         uint aitchInvAmt = investorAmountAitch[msg.sender];
 
         if(ethInvAmt > 0){
-            (bool sent, bytes memory data) = address(msg.sender).call{
+            (bool sent, bytes memory data) = address (msg.sender).call{
             value: ethInvAmt
         }("");
         require(sent, "Failed to send Ether");
