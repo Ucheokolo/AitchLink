@@ -92,8 +92,8 @@ contract LaunchPad {
 
     }
 
-    function investWithAitch(uint _amount) public {
-        address aitch = 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
+    function investWithAitch(uint _amount, address _aitchToken) public {
+        address aitch = _aitchToken;
         require(IERC20(aitch).balanceOf(msg.sender) > 0, "Insufficient Fund");
         investConditions();
         IERC20(aitch).transferFrom(msg.sender, address(this), _amount);
