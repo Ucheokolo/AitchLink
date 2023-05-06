@@ -15,7 +15,7 @@ contract Factory {
     factoryOwner = msg.sender;
    }
 
-   function CreateNewToken(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner) public returns(address){
+   function CreateLaunchpad(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner) public returns(address){
     launchpadID = launchpadID + 1;
     LaunchPad launchpadName = new LaunchPad(_tokenAddr, _tokenName, _Amount, factoryOwner);
     launchpad.push(launchpadName);

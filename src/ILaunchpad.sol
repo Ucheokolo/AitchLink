@@ -5,7 +5,7 @@ interface ILaunchpad{
      function proposeStart() external;
      function activateLaunchpad() external;
      function investWithEth() external payable;
-     function investWithAitch(uint _amount) external;
+     function investWithAitch(uint _amount, address _aitchToken) external;
      function claimTokens() external;
      function cancelLaunchpad() external;
      function suspendLaunchpad() external;
