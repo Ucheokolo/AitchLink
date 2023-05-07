@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "lib/forge-std/src/console.sol";
 
 contract LaunchPad {
     address public factoryOwner;
@@ -102,14 +103,23 @@ contract LaunchPad {
     }
 
     function claimTokens() public {
+        if(block.timestamp > launchpadDetail[launchPadToken].launchStart + 2 days){
+            launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
+        }
+        console.log("check1");
         require(launchpadDetail[launchPadToken].launchpadStatus == status.concluded || launchpadDetail[launchPadToken].launchpadStatus == status.canceled, "Launchpad In-progress");
         require(investorEth[msg.sender] == true || investorAitch[msg.sender] == true, "Non-participant");
         require(msg.sender != factoryOwner || msg.sender != launchPadCreator, "Admins Prohibited");
+        console.log("check2");
+
+        
 
         if(launchpadDetail[launchPadToken].launchpadStatus == status.concluded){
+            console.log("check3");
         claimConditions();
         }
         if(launchpadDetail[launchPadToken].launchpadStatus == status.canceled){
+            
             retreiveConditions();
         }
     }

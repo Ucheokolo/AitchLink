@@ -82,6 +82,10 @@ contract FactoryTest is Test {
         vm.prank(inv4);
         ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
 
+        vm.warp(3 days);
+        vm.prank(inv3);
+        ILaunchpad(address(launchpad)).claimTokens();
+
         console.log(address(launchpad).balance);
         // 4 000 000 000 000 000 00
 
