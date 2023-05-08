@@ -9,4 +9,7 @@ interface ILaunchpad{
      function claimTokens() external;
      function cancelLaunchpad() external;
      function suspendLaunchpad() external;
+     function getAitchPrice() external returns(uint);
+     function getEthtPrice() external returns(uint);
+     function claimLpTokenEth() external;
 }
