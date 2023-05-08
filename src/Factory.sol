@@ -15,9 +15,9 @@ contract Factory {
     factoryOwner = msg.sender;
    }
 
-   function CreateLaunchpad(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner) public returns(address){
+   function CreateLaunchpad(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner, address _aitchToken) public returns(address){
     launchpadID = launchpadID + 1;
-    LaunchPad launchpadName = new LaunchPad(_tokenAddr, _tokenName, _Amount, factoryOwner);
+    LaunchPad launchpadName = new LaunchPad(_tokenAddr, _tokenName, _Amount, factoryOwner, _aitchToken);
     launchpad.push(launchpadName);
     IERC20(_tokenAddr).transferFrom(msg.sender, address(launchpadName), _Amount);
     Lps[launchpadID] = address(launchpadName);

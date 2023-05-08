@@ -12,6 +12,10 @@ contract FactoryTest is Test {
     Factory public factory;
     LaunchpadToken public token;
     LaunchpadToken public Aitch;
+    uint256 mainnetFork;
+    string MAINNET_RPC_URL = vm.envString("MAINNET_RPC_URL");
+
+    // address public Aitch 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
     address factoryOwner = mkaddr("factoryOwner");
     address me = mkaddr("me");
     address inv1 = mkaddr("inv1");
@@ -24,6 +28,7 @@ contract FactoryTest is Test {
 
 
     function setUp() public {
+        mainnetFork = vm.createFork(MAINNET_RPC_URL);
         vm.startPrank(factoryOwner);
         token = new LaunchpadToken("FirstPad", "FP");
         Aitch = new LaunchpadToken("Aitch", "AT");
@@ -32,6 +37,7 @@ contract FactoryTest is Test {
     }
 
     function testCreateLaunchpad() public {
+        vm.selectFork(mainnetFork);
         vm.startPrank(factoryOwner);
         token.mintTokens(me, 10 ether);
         Aitch.mintTokens(inv1, 10 ether);
@@ -44,7 +50,7 @@ contract FactoryTest is Test {
         
         vm.startPrank(me);
         token.approve(address(factory), 1 ether);
-        launchpad = factory.CreateLaunchpad(address(token), "Aitch", 1 ether, factoryOwner);
+        launchpad = factory.CreateLaunchpad(address(token), "Aitch", 1 ether, factoryOwner, address(Aitch));
         vm.stopPrank();
         
 
@@ -66,7 +72,7 @@ contract FactoryTest is Test {
         vm.deal(inv6, 2 ether);
         testCreateLaunchpad();
         testActivateLaunchpad();
-        // testActivateLaunchpad();
+        testActivateLaunchpad();
         vm.prank(inv1);
         ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
         vm.startPrank(inv2);
@@ -82,13 +88,23 @@ contract FactoryTest is Test {
         vm.prank(inv4);
         ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
 
-        vm.warp(3 days);
-        vm.prank(inv3);
-        ILaunchpad(address(launchpad)).claimTokens();
+
+        
 
         console.log(address(launchpad).balance);
-        // 4 000 000 000 000 000 00
+        // 400 000 000 000 000 000
+        // 330 000 000 000 000 000
+        // https://eth-mainnet.g.alchemy.com/v2/Z3fhnS-rtbXvUck31_58ooWa-ApUzHbo
 
+    }
+
+    function testClaimToken() public {
+        testCreateLaunchpad();
+        testActivateLaunchpad();
+        testActivateLaunchpad();
+        vm.warp(3 days);
+        vm.prank(inv3);
+        ILaunchpad(address(launchpad)).claimLpTokenEth();
     }
 
 
