@@ -12,8 +12,8 @@ contract FactoryTest is Test {
     Factory public factory;
     LaunchpadToken public token;
     LaunchpadToken public Aitch;
-    uint256 mainnetFork;
-    string MAINNET_RPC_URL = vm.envString("MAINNET_RPC_URL");
+    // uint256 mainnetFork;
+    // string MAINNET_RPC_URL = vm.envString("MAINNET_RPC_URL");
 
     // address public Aitch 0xF3164AAcb3Ed9EEa02bed546EFbC693BDf130d36;
     address factoryOwner = mkaddr("factoryOwner");
@@ -28,7 +28,7 @@ contract FactoryTest is Test {
 
 
     function setUp() public {
-        mainnetFork = vm.createFork(MAINNET_RPC_URL);
+        // mainnetFork = vm.createFork(MAINNET_RPC_URL);
         vm.startPrank(factoryOwner);
         token = new LaunchpadToken("FirstPad", "FP");
         Aitch = new LaunchpadToken("Aitch", "AT");
@@ -37,7 +37,7 @@ contract FactoryTest is Test {
     }
 
     function testCreateLaunchpad() public {
-        vm.selectFork(mainnetFork);
+        // vm.selectFork(mainnetFork);
         vm.startPrank(factoryOwner);
         token.mintTokens(me, 10 ether);
         Aitch.mintTokens(inv1, 10 ether);
@@ -49,8 +49,8 @@ contract FactoryTest is Test {
         vm.stopPrank();
         
         vm.startPrank(me);
-        token.approve(address(factory), 1 ether);
-        launchpad = factory.CreateLaunchpad(address(token), "Aitch", 1 ether, factoryOwner, address(Aitch));
+        token.approve(address(factory), 10 ether);
+        launchpad = factory.CreateLaunchpad(address(token), "First Pad", 5 ether, factoryOwner, address(Aitch));
         vm.stopPrank();
         
 
@@ -63,7 +63,7 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).activateLaunchpad();
     }
 
-    function testInvestWithEth() public {
+    function testInvestLaunchpad() public {
         vm.deal(inv1, 2 ether);
         vm.deal(inv2, 2 ether);
         vm.deal(inv3, 2 ether);
@@ -72,21 +72,20 @@ contract FactoryTest is Test {
         vm.deal(inv6, 2 ether);
         testCreateLaunchpad();
         testActivateLaunchpad();
-        testActivateLaunchpad();
-        vm.prank(inv1);
-        ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
+        // vm.prank(inv1);
+        // ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
         vm.startPrank(inv2);
         Aitch.approve(address(launchpad), 1 ether);
-        ILaunchpad(address(launchpad)).investWithAitch(0.5 ether, address(Aitch));
+        ILaunchpad(address(launchpad)).investLaunchpad(0.5 ether);
         vm.stopPrank();
 
        vm.startPrank(inv3);
         Aitch.approve(address(launchpad), 1 ether);
-        ILaunchpad(address(launchpad)).investWithAitch(0.5 ether, address(Aitch));
+        ILaunchpad(address(launchpad)).investLaunchpad(0.5 ether);
         vm.stopPrank();
 
-        vm.prank(inv4);
-        ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
+        // vm.prank(inv4);
+        // ILaunchpad(address(launchpad)).investWithEth{value: 0.2 ether}();
 
 
         
@@ -101,10 +100,10 @@ contract FactoryTest is Test {
     function testClaimToken() public {
         testCreateLaunchpad();
         testActivateLaunchpad();
-        testActivateLaunchpad();
+        testInvestLaunchpad();
         vm.warp(3 days);
         vm.prank(inv3);
-        ILaunchpad(address(launchpad)).claimLpTokenEth();
+        ILaunchpad(address(launchpad)).claimTokens();
     }
 
 
