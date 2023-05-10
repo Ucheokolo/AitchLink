@@ -44,13 +44,11 @@ contract LaunchPad {
     mapping(address => bool) public investorReceipt;
     mapping(address => uint) public investorAmount;
 
-    constructor(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner, address _aitchToken) {
+    constructor(address _tokenAddr, string memory _tokenName, address _factoryOwner, address _aitchToken) {
         // ethPriceFeed = AggregatorV3Interface(0x1a81afB8146aeFfCFc5E50e8479e826E7D55b910);
         factoryOwner = _factoryOwner;
         launchPadCreator = msg.sender; // msg.sender calling the function in factory
-        launchPadToken = _tokenAddr;
-        IERC20(_tokenAddr).transferFrom(msg.sender, address(this), _Amount);
-        launchPadTokenSupply = IERC20(launchPadToken).balanceOf(address(this));
+        launchPadToken = _tokenAddr; 
         tokenName = _tokenName;
         aitchToken = _aitchToken;
         proposeStart();
@@ -84,6 +82,7 @@ contract LaunchPad {
         _launch.launchpadStatus = status.active;
 
         launchpadDetail[launchPadToken] = _launch;
+        launchPadTokenSupply = IERC20(launchPadToken).balanceOf(address(this));
 
 
     }
