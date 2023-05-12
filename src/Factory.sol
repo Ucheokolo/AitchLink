@@ -4,6 +4,9 @@ pragma solidity ^0.8.9;
 import "src/LaunchPad.sol";
 
 contract Factory {
+  // Events //
+  event DepositedToLaunchPad(address _depositor, uint _ammount);
+
   address factoryOwner;
    LaunchPad[] public launchpad;
    mapping(uint => address) public Lps;

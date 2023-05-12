@@ -30,7 +30,7 @@ contract FactoryTest is Test {
     function setUp() public {
         // mainnetFork = vm.createFork(MAINNET_RPC_URL);
         vm.startPrank(factoryOwner);
-        token = new LaunchpadToken("FirstPad", "FP");
+        token = new LaunchpadToken("Legion", "LG");
         Aitch = new LaunchpadToken("Aitch", "AT");
         factory = new Factory();
         vm.stopPrank();
@@ -50,7 +50,7 @@ contract FactoryTest is Test {
         
         vm.startPrank(me);
         token.approve(address(factory), 45 ether);
-        launchpad = factory.CreateLaunchpad(address(token), "First Pad", 40 ether, factoryOwner, address(Aitch));
+        launchpad = factory.CreateLaunchpad(address(token), "Legion", 40 ether, factoryOwner, address(Aitch));
         ILaunchpad(address(launchpad)).launchPadStatus();
         vm.stopPrank();
         
@@ -64,7 +64,7 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).activateLaunchpad();
     }
 
-    function testInvestLaunchpad() public returns(uint, uint){
+    function testInvestLaunchpad() public returns(uint){
         vm.deal(inv1, 2 ether);
         vm.deal(inv2, 2 ether);
         vm.deal(inv3, 2 ether);
@@ -73,8 +73,10 @@ contract FactoryTest is Test {
         vm.deal(inv6, 2 ether);
         testCreateLaunchpad();
         testActivateLaunchpad();
-        vm.prank(inv1);
-        ILaunchpad(address(launchpad)).investEther{value: 0.27 ether}();
+        vm.startPrank(inv1);
+        Aitch.approve(address(launchpad), 8 ether);
+        ILaunchpad(address(launchpad)).investAitch(7.91 ether);
+        vm.stopPrank();
 
         vm.startPrank(inv2);
         Aitch.approve(address(launchpad), 4 ether);
@@ -86,14 +88,16 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).investAitch(5 ether);
         vm.stopPrank();
 
-        vm.prank(inv4);
-        ILaunchpad(address(launchpad)).investEther{value: 1.35 ether}();
-        uint ethBal = address(launchpad).balance;
+        vm.startPrank(inv4);
+        Aitch.approve(address(launchpad), 6 ether);
+        ILaunchpad(address(launchpad)).investAitch(4.7 ether);
+        vm.stopPrank();
+
         uint aitchBal = IERC20(Aitch).balanceOf(address(launchpad));
 
         ILaunchpad(address(launchpad)).launchPadStatus();
 
-        return (ethBal, aitchBal);
+        return (aitchBal);
 
         
 
@@ -103,7 +107,7 @@ contract FactoryTest is Test {
 
     }
 
-    function testClaimToken() public {
+    function testClaimToken() public returns(uint) {
         testCreateLaunchpad();
         testActivateLaunchpad();
         testInvestLaunchpad();
@@ -111,8 +115,20 @@ contract FactoryTest is Test {
         vm.prank(inv3);
         ILaunchpad(address(launchpad)).claimTokens();
 
-        vm.prank(inv3);
+        vm.prank(inv1);
         ILaunchpad(address(launchpad)).claimTokens();
+
+        vm.prank(inv2);
+        ILaunchpad(address(launchpad)).claimTokens();
+
+        vm.prank(inv4);
+        ILaunchpad(address(launchpad)).claimTokens();
+
+        uint remaining = IERC20(token).balanceOf(address(launchpad));
+
+        ILaunchpad(address(launchpad)).launchpadName();
+
+        return remaining;
     }
 
 
@@ -128,3 +144,4 @@ contract FactoryTest is Test {
 // 1 087 500 000 000 000 000
 // 8 700 000 000 000 000 000
 // 40 000 000 000 000 000 000
+// 22 988 505 747 126 436 780

@@ -2,7 +2,11 @@
 pragma solidity ^0.8.9;
 
 interface ILaunchpad{
+     function launchpadName() external;
+     function launchPadTokenSupply_() external;
      function launchPadStatus() external;
+     function getUserInvestment() external;
+
      function proposeStart() external;
      function activateLaunchpad() external;
      function investAitch(uint _amount) external;
@@ -10,4 +14,6 @@ interface ILaunchpad{
      function claimTokens() external;
      function cancelLaunchpad() external;
      function suspendLaunchpad() external;
+
+     function withdrawFunds(address _receiver, uint _amount) external;
 }
