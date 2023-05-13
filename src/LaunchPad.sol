@@ -6,7 +6,6 @@ import "lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0
 import "lib/forge-std/src/console.sol";
 
 contract LaunchPad {
-
     // Events //
     event LaunchpadProposed(address _proposer, address _token, uint _time);
     event LaunchpadActivated(address _activator, uint _time);
@@ -14,8 +13,7 @@ contract LaunchPad {
     event TokenClaim(address _claimer, address _token, uint _amount);
     event CancelLaunchpad(address _admin, uint _time);
     event SuspendLaunchpad(address _admin, uint _time);
-    event adminWithdrawal(address _admin, uint _time);
-
+    event AdminWithdrawal(address _admin, uint _amount, uint _time);
 
     // Basic information //
     address public factoryOwner;
@@ -26,9 +24,8 @@ contract LaunchPad {
     uint public launchPadTokenSupply;
     AggregatorV3Interface internal ethPriceFeed;
 
-
     // launchpad Status Details //
-    enum status{
+    enum status {
         processing,
         active,
         concluded,
@@ -49,7 +46,6 @@ contract LaunchPad {
     }
     mapping(address => launchpadDetails) public launchpadDetail;
 
-
     // investor Participation //
     mapping(address => bool) public Investor;
     mapping(address => uint) public etherInvestment;
@@ -58,35 +54,43 @@ contract LaunchPad {
     // Confirm Token claims //
     mapping(address => bool) public investorClaimed;
 
-    constructor(address _tokenAddr, string memory _tokenName, address _factoryOwner, address _aitchToken) {
-        ethPriceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
+    constructor(
+        address _tokenAddr,
+        string memory _tokenName,
+        address _factoryOwner,
+        address _creator,
+        address _aitchToken
+    ) {
+        ethPriceFeed = AggregatorV3Interface(
+            0x694AA1769357215DE4FAC081bf1f309aDC325306
+        );
         factoryOwner = _factoryOwner;
-        launchPadCreator = msg.sender; // msg.sender calling the function in factory
-        launchPadToken = _tokenAddr; 
+        launchPadCreator = _creator; // msg.sender calling the function in factory
+        launchPadToken = _tokenAddr;
         tokenName = _tokenName;
         aitchToken = _aitchToken;
         proposeStart();
     }
 
-    function admin() view internal {
-        require(msg.sender == factoryOwner, "Unauthorized Operation" );
+    function admin() internal view {
+        require(msg.sender == factoryOwner, "Unauthorized Operation");
     }
-    
+
     // Read functions //
-    function launchpadName() view public returns(string memory){
+    function launchpadName() public view returns (string memory) {
         return (string.concat(tokenName, " Launchpad"));
     }
 
-    function launchPadTokenSupply_() view public returns(uint){
+    function launchPadTokenSupply_() public view returns (uint) {
         return launchPadTokenSupply;
     }
 
-    function launchPadStatus() view public returns(status){
+    function launchPadStatus() public view returns (status) {
         status currentStatus = launchpadDetail[launchPadToken].launchpadStatus;
         return currentStatus;
     }
 
-    function getUserInvestment() view public returns(uint){
+    function getUserInvestment() public view returns (uint) {
         uint investmentAmount = aitchInvestment[msg.sender];
         return investmentAmount;
     }
@@ -99,7 +103,7 @@ contract LaunchPad {
         _launch.proposalTime = block.timestamp;
         _launch.launchpadStatus = status.processing;
         launchpadDetail[launchPadToken] = _launch;
-        
+
         emit LaunchpadProposed(msg.sender, launchPadToken, block.timestamp);
     }
 
@@ -117,11 +121,13 @@ contract LaunchPad {
         launchpadDetail[launchPadToken] = _launch;
 
         emit LaunchpadActivated(msg.sender, block.timestamp);
-        
     }
 
     function investAitch(uint _amount) public {
-        require(IERC20(aitchToken).balanceOf(msg.sender) > 0, "Insufficient Fund");
+        require(
+            IERC20(aitchToken).balanceOf(msg.sender) > 0,
+            "Insufficient Fund"
+        );
         investConditions();
         IERC20(aitchToken).transferFrom(msg.sender, address(this), _amount);
         Investor[msg.sender] = true;
@@ -130,7 +136,7 @@ contract LaunchPad {
         emit UserInvestment(msg.sender, _amount);
     }
 
-    function investEther() payable public{
+    function investEther() public payable {
         require(msg.value > 0, "Insuficient Fund");
         investConditions();
         Investor[msg.sender] = true;
@@ -139,14 +145,18 @@ contract LaunchPad {
         emit UserInvestment(msg.sender, msg.value);
     }
 
-     function claimTokens() public {
+    function claimTokens() public {
         claimConditions();
-     }
+    }
 
     function cancelLaunchpad() public {
         admin();
         status contractStatus = launchpadDetail[launchPadToken].launchpadStatus;
-        require(contractStatus != status.canceled || contractStatus != status.concluded, "Launchpad Finalized");
+        require(
+            contractStatus != status.canceled ||
+                contractStatus != status.concluded,
+            "Launchpad Finalized"
+        );
 
         launchpadDetail[launchPadToken].launchpadStatus = status.canceled;
 
@@ -155,11 +165,15 @@ contract LaunchPad {
 
     function suspendLaunchpad() public {
         admin();
-        if(launchpadDetail[launchPadToken].launchpadStatus == status.active){
+        if (launchpadDetail[launchPadToken].launchpadStatus == status.active) {
             launchpadDetail[launchPadToken].launchpadStatus = status.suspended;
-        } else if(launchpadDetail[launchPadToken].launchpadStatus == status.suspended){
+        } else if (
+            launchpadDetail[launchPadToken].launchpadStatus == status.suspended
+        ) {
             launchpadDetail[launchPadToken].launchpadStatus = status.active;
         } else return;
+
+        emit SuspendLaunchpad(msg.sender, block.timestamp);
     }
 
     function withdrawFunds(address _receiver, uint _amount) public {
@@ -167,29 +181,40 @@ contract LaunchPad {
         adminWithdrawConditions();
         require(_receiver != address(0), "Address zero");
         IERC20(aitchToken).transfer(_receiver, _amount);
-    }
 
+        emit AdminWithdrawal(msg.sender, _amount, block.timestamp);
+    }
 
     /////////////////////////////////////////////////////////////////////
     ///                      Internal functions                       ///
     /////////////////////////////////////////////////////////////////////
-     
+
     function investConditions() internal {
         uint startTime = launchpadDetail[launchPadToken].launchStart;
         uint duration = launchpadDetail[launchPadToken].duration;
 
-        require(msg.sender != launchPadCreator && msg.sender != factoryOwner, "Admins Prohibited");
+        require(
+            msg.sender != launchPadCreator && msg.sender != factoryOwner,
+            "Admins Prohibited"
+        );
 
         require(msg.sender != address(0), "Unauthorized Operation");
 
-        if(launchpadDetail[launchPadToken].launchpadStatus == status.processing) revert("Coming Soon");
-        if(launchpadDetail[launchPadToken].launchpadStatus == status.canceled) revert("launchPad Canceled");
-        if(launchpadDetail[launchPadToken].launchpadStatus == status.suspended) revert("launchPad Suspended");
+        if (
+            launchpadDetail[launchPadToken].launchpadStatus == status.processing
+        ) revert("Coming Soon");
+        if (launchpadDetail[launchPadToken].launchpadStatus == status.canceled)
+            revert("launchPad Canceled");
+        if (launchpadDetail[launchPadToken].launchpadStatus == status.suspended)
+            revert("launchPad Suspended");
 
-        if(block.timestamp > startTime + duration){
+        if (block.timestamp > startTime + duration) {
             launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
         }
-        require(launchpadDetail[launchPadToken].launchpadStatus == status.active, "launchpad Concluded");
+        require(
+            launchpadDetail[launchPadToken].launchpadStatus == status.active,
+            "launchpad Concluded"
+        );
     }
 
     function claimConditions() internal {
@@ -198,36 +223,44 @@ contract LaunchPad {
         require(investorClaimed[msg.sender] == false, "Token Claimed");
         require(Investor[msg.sender] == true, "Invalid user");
         require(aitchInvestment[msg.sender] > 0, "This address has claimed");
-        if(block.timestamp > startTime + duration){
+        if (block.timestamp > startTime + duration) {
             launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
         }
-        require(launchpadDetail[launchPadToken].launchpadStatus == status.concluded, "launchpad Inprogress");
+        require(
+            launchpadDetail[launchPadToken].launchpadStatus == status.concluded,
+            "launchpad Inprogress"
+        );
         uint rate = setTokenPrice();
         uint investment = aitchInvestment[msg.sender];
-        uint claimable = (investment * rate)/ (10 ** 18);
+        uint claimable = (investment * rate) / (10 ** 18);
         IERC20(launchPadToken).transfer(msg.sender, claimable);
         investorClaimed[msg.sender] = true;
 
         emit TokenClaim(msg.sender, launchPadToken, claimable);
-        
     }
 
-    function adminWithdrawConditions() view internal{
+    function adminWithdrawConditions() internal view {
         status contractStatus = launchpadDetail[launchPadToken].launchpadStatus;
-        require(contractStatus == status.concluded || contractStatus == status.canceled, "Launchpad inprogress");
-        require(IERC20(aitchToken).balanceOf(address(this)) > 0, "Insufficient Funds");
+        require(
+            contractStatus == status.concluded ||
+                contractStatus == status.canceled,
+            "Launchpad inprogress"
+        );
+        require(
+            IERC20(aitchToken).balanceOf(address(this)) > 0,
+            "Insufficient Funds"
+        );
     }
 
-    function setTokenPrice() view internal returns(uint){
+    function setTokenPrice() internal view returns (uint) {
         // uint ethBal = address(this).balance;
         // uint ethAitchRates = uint(getLatestPrice()) * (10 ** 8);
         // uint revenueEther = ethBal * ethAitchRates;
         // console.log(revenueEther);
         uint revenueAitch = IERC20(aitchToken).balanceOf(address(this));
         uint totalRevenue = revenueAitch;
-        uint price = (launchPadTokenSupply * (10 ** 18)) /  totalRevenue;
+        uint price = (launchPadTokenSupply * (10 ** 18)) / totalRevenue;
         return price;
-
     }
 
     // function getLatestPrice() public view returns (int) {
@@ -241,6 +274,4 @@ contract LaunchPad {
     //     ) = ethPriceFeed.latestRoundData();
     //     return price;
     // }
-
-
 }

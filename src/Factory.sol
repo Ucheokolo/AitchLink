@@ -2,30 +2,63 @@
 pragma solidity ^0.8.9;
 
 import "src/LaunchPad.sol";
+import "src/GovernanceToken.sol";
 
 contract Factory {
-  // Events //
-  event DepositedToLaunchPad(address _depositor, uint _ammount);
+    address factoryOwner;
+    uint launchpadID;
+    LaunchPad[] public launchpad;
 
-  address factoryOwner;
-   LaunchPad[] public launchpad;
-   mapping(uint => address) public Lps;
-   uint launchpadID;
-   
+    struct launchpadPackage {
+        uint LaunchPadId;
+        address LaunchPadcreator;
+        address launchpadAddress;
+        address launchpadVoteToken;
+        uint voteTokenSupply;
+    }
 
+    launchpadPackage[] public launchpadInfo;
 
-   constructor(){
-    factoryOwner = msg.sender;
-   }
+    constructor() {
+        factoryOwner = msg.sender;
+    }
 
-   function CreateLaunchpad(address _tokenAddr, string memory _tokenName, uint _Amount, address _factoryOwner, address _aitchToken) public returns(address){
-    launchpadID = launchpadID + 1;
-    LaunchPad launchpadName = new LaunchPad(_tokenAddr, _tokenName, factoryOwner, _aitchToken);
-    launchpad.push(launchpadName);
-    IERC20(_tokenAddr).transferFrom(msg.sender, address(launchpadName), _Amount);
-    Lps[launchpadID] = address(launchpadName);
+    function CreateLaunchpad(
+        address _tokenAddr,
+        string memory _tokenName,
+        uint _Amount,
+        address _factoryOwner,
+        address _creator,
+        address _aitchToken
+    ) public returns (address) {
+        launchpadID = launchpadID + 1;
+        string memory voteTokenName = string.concat(_tokenName, "VoteToken");
+        _creator = msg.sender;
 
-    return address(launchpadName);
+        LaunchPad launchpadName = new LaunchPad(
+            _tokenAddr,
+            _tokenName,
+            factoryOwner,
+            _creator,
+            _aitchToken
+        );
+
+        GovernanceToken voteToken = new GovernanceToken(
+            voteTokenName,
+            "VT",
+            factoryOwner,
+            _creator
+        );
+
+        IERC20(_tokenAddr).transferFrom(
+            msg.sender,
+            address(launchpadName),
+            _Amount
+        );
+
+        // voteToken.mintTokens(address(launchpadName), _Amount);
+
+        launchpad.push(launchpadName);
+        return (address(launchpadName));
     }
 }
-
