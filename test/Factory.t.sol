@@ -5,8 +5,8 @@ import "forge-std/Test.sol";
 import "../src/Factory.sol";
 import "src/LaunchpadToken.sol";
 import "src/ILaunchpad.sol";
-// import {ITokens} from "src/iToken.sol";
 
+import {ITokens} from "src/iToken.sol";
 
 contract FactoryTest is Test {
     Factory public factory;
@@ -25,7 +25,6 @@ contract FactoryTest is Test {
     address inv5 = mkaddr("inv5");
     address inv6 = mkaddr("inv6");
     address launchpad;
-
 
     function setUp() public {
         // mainnetFork = vm.createFork(MAINNET_RPC_URL);
@@ -47,24 +46,28 @@ contract FactoryTest is Test {
         Aitch.mintTokens(inv5, 20 ether);
         Aitch.mintTokens(inv6, 20 ether);
         vm.stopPrank();
-        
+
         vm.startPrank(me);
         token.approve(address(factory), 45 ether);
-        launchpad = factory.CreateLaunchpad(address(token), "Legion", 40 ether, factoryOwner, address(Aitch));
+        launchpad = factory.CreateLaunchpad(
+            address(token),
+            "Legion",
+            40 ether,
+            factoryOwner,
+            msg.sender,
+            address(Aitch)
+        );
         ILaunchpad(address(launchpad)).launchPadStatus();
         vm.stopPrank();
-        
-
     }
 
     function testActivateLaunchpad() public {
-        
         testCreateLaunchpad();
         vm.prank(factoryOwner);
         ILaunchpad(address(launchpad)).activateLaunchpad();
     }
 
-    function testInvestLaunchpad() public returns(uint){
+    function testInvestLaunchpad() public returns (uint) {
         vm.deal(inv1, 2 ether);
         vm.deal(inv2, 2 ether);
         vm.deal(inv3, 2 ether);
@@ -83,7 +86,7 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).investAitch(3.7 ether);
         vm.stopPrank();
 
-       vm.startPrank(inv3);
+        vm.startPrank(inv3);
         Aitch.approve(address(launchpad), 6 ether);
         ILaunchpad(address(launchpad)).investAitch(5 ether);
         vm.stopPrank();
@@ -99,15 +102,12 @@ contract FactoryTest is Test {
 
         return (aitchBal);
 
-        
-
         console.log(address(launchpad).balance);
-    
-        // https://eth-mainnet.g.alchemy.com/v2/Z3fhnS-rtbXvUck31_58ooWa-ApUzHbo
 
+        // https://eth-mainnet.g.alchemy.com/v2/Z3fhnS-rtbXvUck31_58ooWa-ApUzHbo
     }
 
-    function testClaimToken() public returns(uint) {
+    function testClaimToken() public returns (uint) {
         testCreateLaunchpad();
         testActivateLaunchpad();
         testInvestLaunchpad();
@@ -130,7 +130,6 @@ contract FactoryTest is Test {
 
         return remaining;
     }
-
 
     function mkaddr(string memory name) public returns (address) {
         address addr = address(
