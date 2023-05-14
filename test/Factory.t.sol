@@ -98,20 +98,25 @@ contract FactoryTest is Test {
 
         uint aitchBal = IERC20(Aitch).balanceOf(address(launchpad));
 
+        vm.prank(factoryOwner);
+        ILaunchpad(address(launchpad)).cancelLaunchpad();
+
         ILaunchpad(address(launchpad)).launchPadStatus();
 
-        return (aitchBal);
-
         console.log(address(launchpad).balance);
+        return (aitchBal);
 
         // https://eth-mainnet.g.alchemy.com/v2/Z3fhnS-rtbXvUck31_58ooWa-ApUzHbo
     }
 
+    // 14 847 489 441 576 724 541
+    // 8 822 149 225 715 626 465
+    // 6 945 096 198 967 620 834
     function testClaimToken() public returns (uint) {
         testCreateLaunchpad();
         testActivateLaunchpad();
         testInvestLaunchpad();
-        vm.warp(3 days);
+        // vm.warp(3 days);
         vm.prank(inv3);
         ILaunchpad(address(launchpad)).claimTokens();
 
