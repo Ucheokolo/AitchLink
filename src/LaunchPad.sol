@@ -284,11 +284,11 @@ contract LaunchPad {
         uint aitchInv = aitchInvestment[msg.sender];
 
         if (aitchInv > 0) {
-            // aitchInvestment[msg.sender] = 0;
-            IERC20(aitchToken).transfer(msg.sender, ethInv);
+            aitchInvestment[msg.sender] = 0;
+            IERC20(aitchToken).transfer(msg.sender, aitchInv);
         }
         if (ethInv > 0) {
-            // etherInvestment[msg.sender] = 0;
+            etherInvestment[msg.sender] = 0;
             (bool sent, ) = payable(msg.sender).call{value: ethInv}("");
             require(sent, "Failed to send Ether");
         }
