@@ -333,15 +333,15 @@ contract LaunchPad {
         return commission;
     }
 
-    // function getLatestPrice() public view returns (int) {
-    //     // prettier-ignore
-    //     (
-    //         /* uint80 roundID */,
-    //         int price,
-    //         /*uint startedAt*/,
-    //         /*uint timeStamp*/,
-    //         /*uint80 answeredInRound*/
-    //     ) = ethPriceFeed.latestRoundData();
-    //     return price;
-    // }
+    function getLatestPrice() public view returns (int) {
+        // prettier-ignore
+        (
+            /* uint80 roundID */,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = ethPriceFeed.latestRoundData();
+        return price;
+    }
 }
