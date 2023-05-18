@@ -198,7 +198,7 @@ contract LaunchPad {
 
     function payCreator(address _recipient, uint _amount) public {
         admin();
-        require(commissionClaimed == true, "Withdraw Commission");
+        require(commissionClaimed == true, "Withdraw Commissions First");
         require(_recipient == launchPadCreator, "Unauthorized Recipient");
         PayCreatorConditions();
         IERC20(aitchToken).transfer(launchPadCreator, _amount);
