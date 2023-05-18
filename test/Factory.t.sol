@@ -129,8 +129,9 @@ contract FactoryTest is Test {
 
         ILaunchpad(address(launchpad)).launchpadName();
 
-        vm.prank(factoryOwner);
+        vm.startPrank(factoryOwner);
         ILaunchpad(address(launchpad)).withdrawCommission();
+        ILaunchpad(address(launchpad)).payCreator(me, 2 ether);
 
         return remaining;
     }
