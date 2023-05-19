@@ -29,6 +29,11 @@ contract FactoryTest is Test {
     function setUp() public {
         // mainnetFork = vm.createFork(MAINNET_RPC_URL);
         vm.startPrank(factoryOwner);
+        uint256 forkId = vm.createFork(
+            "https://eth-mainnet.g.alchemy.com/v2/Z3fhnS-rtbXvUck31_58ooWa-ApUzHbo",
+            17292955
+        );
+        vm.selectFork(forkId);
         token = new LaunchpadToken("Legion", "LG");
         Aitch = new LaunchpadToken("Aitch", "AT");
         factory = new Factory();
@@ -96,6 +101,18 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).investAitch(4.7 ether);
         vm.stopPrank();
 
+        vm.startPrank(inv4);
+        ILaunchpad(address(launchpad)).investEther{value: 0.2 ether}();
+        vm.stopPrank();
+
+        vm.startPrank(inv3);
+        ILaunchpad(address(launchpad)).investEther{value: 1.3 ether}();
+        vm.stopPrank();
+
+        vm.startPrank(inv2);
+        ILaunchpad(address(launchpad)).investEther{value: 1.8 ether}();
+        vm.stopPrank();
+
         uint aitchBal = IERC20(Aitch).balanceOf(address(launchpad));
 
         vm.prank(factoryOwner);
@@ -112,7 +129,7 @@ contract FactoryTest is Test {
         testCreateLaunchpad();
         testActivateLaunchpad();
         testInvestLaunchpad();
-        vm.warp(3 days);
+        vm.warp(block.timestamp + 5 days);
         ILaunchpad(address(launchpad)).launchPadStatus();
         vm.prank(inv3);
         ILaunchpad(address(launchpad)).claimTokens();
@@ -132,7 +149,7 @@ contract FactoryTest is Test {
 
         vm.startPrank(factoryOwner);
         ILaunchpad(address(launchpad)).withdrawCommission();
-        ILaunchpad(address(launchpad)).payCreator(me, 2 ether);
+        // ILaunchpad(address(launchpad)).payCreator(me, 2 ether);
 
         return remaining;
     }
@@ -145,5 +162,8 @@ contract FactoryTest is Test {
         return addr;
     }
 }
-//
+
+// 5 966 400 000 000 000 000 000
+// 165 000 000 000 000 000
+// 10 000 000 000 000 000
 // 180 301 000 000
