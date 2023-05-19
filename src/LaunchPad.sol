@@ -63,7 +63,7 @@ contract LaunchPad {
         address _aitchToken
     ) {
         ethPriceFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
+            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
         );
         factoryOwner = _factoryOwner;
         launchPadCreator = _creator; // msg.sender calling the function in factory
@@ -251,6 +251,7 @@ contract LaunchPad {
         if (block.timestamp > startTime + duration) {
             launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
         }
+
         require(
             launchpadDetail[launchPadToken].launchpadStatus ==
                 status.concluded ||
@@ -269,14 +270,20 @@ contract LaunchPad {
     function claimLauchpadTokenConditions() internal {
         uint aitchI = aitchInvestment[msg.sender];
         uint ethI = etherInvestment[msg.sender];
+        uint rate = setTokenPrice();
         if (aitchI > 0) {
-            uint rate = setTokenPrice();
             uint claimable = (aitchI * rate) / (10 ** 18);
             IERC20(launchPadToken).transfer(msg.sender, claimable);
 
             emit TokenClaim(msg.sender, launchPadToken, claimable);
         }
-        if (ethI > 0) {}
+        if (ethI > 0) {
+            uint ethAitchRates = uint(getLatestPrice()) / (10 ** 8);
+            uint userInvInAitch = ethAitchRates * ethI;
+            uint claimable = (userInvInAitch * rate) / (10 ** 18);
+            IERC20(launchPadToken).transfer(msg.sender, claimable);
+            emit TokenClaim(msg.sender, launchPadToken, claimable);
+        }
     }
 
     function retrieveConditions() internal {
@@ -295,8 +302,10 @@ contract LaunchPad {
     }
 
     function commissionConditions() internal view {
+        status launchpadState = launchpadDetail[launchPadToken].launchpadStatus;
+        if (launchpadState == status.canceled) revert("Launchpad Canceled");
         require(
-            launchpadDetail[launchPadToken].launchpadStatus == status.concluded,
+            launchpadState == status.concluded,
             "Withdrawal Unavailable at this Time"
         );
         require(commissionClaimed == false, "Already Withdrawn");
@@ -316,12 +325,13 @@ contract LaunchPad {
     }
 
     function setTokenPrice() internal view returns (uint) {
-        // uint ethBal = address(this).balance;
-        // uint ethAitchRates = uint(getLatestPrice()) * (10 ** 8);
-        // uint revenueEther = ethBal * ethAitchRates;
-        // console.log(revenueEther);
+        uint ethBal = address(this).balance;
+        uint ethAitchRates = uint(getLatestPrice()) / (10 ** 8);
+        uint revenueEther = ethBal * ethAitchRates;
+        console.log(revenueEther);
+
         uint revenueAitch = IERC20(aitchToken).balanceOf(address(this));
-        uint totalRevenue = revenueAitch;
+        uint totalRevenue = revenueAitch + revenueEther;
         uint price = (launchPadTokenSupply * (10 ** 18)) / totalRevenue;
         return price;
     }

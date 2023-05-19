@@ -113,6 +113,7 @@ contract FactoryTest is Test {
         testActivateLaunchpad();
         testInvestLaunchpad();
         vm.warp(3 days);
+        ILaunchpad(address(launchpad)).launchPadStatus();
         vm.prank(inv3);
         ILaunchpad(address(launchpad)).claimTokens();
 
@@ -144,3 +145,5 @@ contract FactoryTest is Test {
         return addr;
     }
 }
+//
+// 180 301 000 000
