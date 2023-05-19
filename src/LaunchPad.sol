@@ -209,8 +209,7 @@ contract LaunchPad {
     function withdrawCommission() public {
         admin();
         commissionConditions();
-        uint commissionAmt = calculateCommission();
-        IERC20(aitchToken).transfer(factoryOwner, commissionAmt);
+
         commissionClaimed = true;
     }
 
@@ -245,10 +244,9 @@ contract LaunchPad {
     }
 
     function userWithdrawCondition() internal {
-        uint startTime = launchpadDetail[launchPadToken].launchStart;
-        uint duration = launchpadDetail[launchPadToken].duration;
+        uint duration = launchpadDetail[launchPadToken].launchEnd;
 
-        if (block.timestamp > startTime + duration) {
+        if (block.timestamp > duration) {
             launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
         }
 
@@ -301,14 +299,30 @@ contract LaunchPad {
         }
     }
 
-    function commissionConditions() internal view {
+    function commissionConditions() internal {
         status launchpadState = launchpadDetail[launchPadToken].launchpadStatus;
+        uint totalRevenueAitch = IERC20(aitchToken).balanceOf(address(this));
+        uint totalRevenueEth = address(this).balance;
+        uint percentage = 5e16;
+
         if (launchpadState == status.canceled) revert("Launchpad Canceled");
         require(
             launchpadState == status.concluded,
             "Withdrawal Unavailable at this Time"
         );
         require(commissionClaimed == false, "Already Withdrawn");
+
+        uint commissionAitch = (totalRevenueAitch * percentage) / 1e18;
+
+        uint commissionEth = (totalRevenueEth * percentage) / 1e18;
+
+        if (totalRevenueAitch > 0) {
+            IERC20(aitchToken).transfer(factoryOwner, commissionAitch);
+        }
+        if (totalRevenueEth > 0) {
+            (bool sent, ) = payable(msg.sender).call{value: commissionEth}("");
+            require(sent, "Failed to send Ether");
+        }
     }
 
     function PayCreatorConditions() internal view {
@@ -328,19 +342,12 @@ contract LaunchPad {
         uint ethBal = address(this).balance;
         uint ethAitchRates = uint(getLatestPrice()) / (10 ** 8);
         uint revenueEther = ethBal * ethAitchRates;
-        console.log(revenueEther);
+        // console.log(revenueEther);
 
         uint revenueAitch = IERC20(aitchToken).balanceOf(address(this));
         uint totalRevenue = revenueAitch + revenueEther;
         uint price = (launchPadTokenSupply * (10 ** 18)) / totalRevenue;
         return price;
-    }
-
-    function calculateCommission() internal view returns (uint) {
-        uint totalRevenue = IERC20(aitchToken).balanceOf(address(this));
-        uint percentage = 5e16;
-        uint commission = (totalRevenue * percentage) / 1e18;
-        return commission;
     }
 
     function getLatestPrice() public view returns (int) {
