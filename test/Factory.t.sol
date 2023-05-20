@@ -116,7 +116,7 @@ contract FactoryTest is Test {
         uint aitchBal = IERC20(Aitch).balanceOf(address(launchpad));
 
         vm.prank(factoryOwner);
-        // ILaunchpad(address(launchpad)).cancelLaunchpad();
+        ILaunchpad(address(launchpad)).cancelLaunchpad();
 
         ILaunchpad(address(launchpad)).launchPadStatus();
 
