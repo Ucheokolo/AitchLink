@@ -351,7 +351,7 @@ contract LaunchPad {
     }
 
     function getLatestPrice() public view returns (int) {
-        // prettier-ignore
+        prettier-ignore
         (
             /* uint80 roundID */,
             int price,
