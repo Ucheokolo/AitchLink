@@ -30,7 +30,7 @@ contract Factory {
         address _factoryOwner,
         address _creator,
         address _aitchToken
-    ) public returns (address) {
+    ) public returns (address, address) {
         launchpadID = launchpadID + 1;
         string memory voteTokenName = string.concat(_tokenName, "VoteToken");
         _creator = msg.sender;
@@ -47,7 +47,9 @@ contract Factory {
             voteTokenName,
             "VT",
             factoryOwner,
-            _creator
+            _creator,
+            address(launchpadName),
+            _Amount
         );
 
         IERC20(_tokenAddr).transferFrom(
@@ -56,9 +58,7 @@ contract Factory {
             _Amount
         );
 
-        // voteToken.mintTokens(address(launchpadName), _Amount);
-
         launchpad.push(launchpadName);
-        return (address(launchpadName));
+        return (address(launchpadName), address(voteToken));
     }
 }

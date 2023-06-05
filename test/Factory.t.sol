@@ -25,6 +25,7 @@ contract FactoryTest is Test {
     address inv5 = mkaddr("inv5");
     address inv6 = mkaddr("inv6");
     address launchpad;
+    address voteToken;
 
     function setUp() public {
         // mainnetFork = vm.createFork(MAINNET_RPC_URL);
@@ -54,7 +55,7 @@ contract FactoryTest is Test {
 
         vm.startPrank(me);
         token.approve(address(factory), 45 ether);
-        launchpad = factory.CreateLaunchpad(
+        (launchpad, voteToken) = factory.CreateLaunchpad(
             address(token),
             "Legion",
             40 ether,
@@ -63,6 +64,7 @@ contract FactoryTest is Test {
             address(Aitch)
         );
         ILaunchpad(address(launchpad)).launchPadStatus();
+        IERC20(address(voteToken)).balanceOf(address(launchpad));
         vm.stopPrank();
     }
 
@@ -116,7 +118,7 @@ contract FactoryTest is Test {
         uint aitchBal = IERC20(Aitch).balanceOf(address(launchpad));
 
         vm.prank(factoryOwner);
-        ILaunchpad(address(launchpad)).cancelLaunchpad();
+        // ILaunchpad(address(launchpad)).cancelLaunchpad();
 
         ILaunchpad(address(launchpad)).launchPadStatus();
 
@@ -148,7 +150,7 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).launchpadName();
 
         vm.startPrank(factoryOwner);
-        ILaunchpad(address(launchpad)).withdrawCommission();
+        // ILaunchpad(address(launchpad)).withdrawCommission();
         // ILaunchpad(address(launchpad)).payCreator(me, 2 ether);
 
         return remaining;
@@ -163,7 +165,5 @@ contract FactoryTest is Test {
     }
 }
 
-// 5 966 400 000 000 000 000 000
-// 165 000 000 000 000 000
-// 10 000 000 000 000 000
-// 180 301 000 000
+// 33401751253818235
+// 15701495229394875908

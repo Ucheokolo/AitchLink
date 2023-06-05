@@ -14,10 +14,13 @@ contract GovernanceToken is ERC20 {
         string memory _name,
         string memory _symbol,
         address _factoryOwner,
-        address _creator
+        address _creator,
+        address _recipient,
+        uint _amount
     ) ERC20(_name, _symbol) {
         creator = _creator;
         admin = _factoryOwner;
+        mintTokens(_recipient, _amount);
     }
 
     function onlyAdmin() internal view {
@@ -28,11 +31,11 @@ contract GovernanceToken is ERC20 {
         require(msg.sender == creator, "Unauthorized Operation");
     }
 
-    function mintTokens(address _recipient, uint _amount) public {
-        require(
-            msg.sender == admin || msg.sender == creator,
-            "Unauthorized Operation"
-        );
+    function mintTokens(address _recipient, uint _amount) internal {
+        // require(
+        //     msg.sender == admin || msg.sender == creator,
+        //     "Unauthorized Operation"
+        // );
         require(_recipient != address(0), "Invalid Address");
 
         if (msg.sender == creator) {
