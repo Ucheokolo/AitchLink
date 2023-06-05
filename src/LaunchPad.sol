@@ -247,7 +247,13 @@ contract LaunchPad {
         uint duration = launchpadDetail[launchPadToken].launchEnd;
 
         if (block.timestamp > duration) {
-            launchpadDetail[launchPadToken].launchpadStatus = status.concluded;
+            if (
+                launchpadDetail[launchPadToken].launchpadStatus !=
+                status.canceled
+            ) {
+                launchpadDetail[launchPadToken].launchpadStatus = status
+                    .concluded;
+            }
         }
 
         require(
@@ -258,9 +264,11 @@ contract LaunchPad {
             "launchpad Inprogress"
         );
         status contractStatus = launchpadDetail[launchPadToken].launchpadStatus;
+        // console.log(contractStatus);
         if (contractStatus == status.concluded) {
             claimLauchpadTokenConditions();
-        } else if (contractStatus == status.canceled) {
+        }
+        if (contractStatus == status.canceled) {
             retrieveConditions();
         }
     }
@@ -289,11 +297,11 @@ contract LaunchPad {
         uint aitchInv = aitchInvestment[msg.sender];
 
         if (aitchInv > 0) {
-            aitchInvestment[msg.sender] = 0;
+            // aitchInvestment[msg.sender] = 0;
             IERC20(aitchToken).transfer(msg.sender, aitchInv);
         }
         if (ethInv > 0) {
-            etherInvestment[msg.sender] = 0;
+            // etherInvestment[msg.sender] = 0;
             (bool sent, ) = payable(msg.sender).call{value: ethInv}("");
             require(sent, "Failed to send Ether");
         }
@@ -351,7 +359,7 @@ contract LaunchPad {
     }
 
     function getLatestPrice() public view returns (int) {
-        prettier-ignore
+        // prettier-ignore
         (
             /* uint80 roundID */,
             int price,
