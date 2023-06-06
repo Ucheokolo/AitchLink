@@ -59,8 +59,6 @@ contract FactoryTest is Test {
             address(token),
             "Legion",
             40 ether,
-            factoryOwner,
-            msg.sender,
             address(Aitch)
         );
         ILaunchpad(address(launchpad)).launchPadStatus();
@@ -150,8 +148,8 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).launchpadName();
 
         vm.startPrank(factoryOwner);
-        // ILaunchpad(address(launchpad)).withdrawCommission();
-        // ILaunchpad(address(launchpad)).payCreator(me, 2 ether);
+        ILaunchpad(address(launchpad)).withdrawCommission();
+        ILaunchpad(address(launchpad)).payCreator(me, 2 ether);
 
         return remaining;
     }
