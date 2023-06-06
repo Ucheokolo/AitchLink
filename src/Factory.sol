@@ -18,6 +18,7 @@ contract Factory {
     }
 
     launchpadPackage[] public launchpadInfo;
+    mapping(uint => launchpadPackage) public launchDetails;
 
     constructor() {
         factoryOwner = msg.sender;
@@ -27,19 +28,17 @@ contract Factory {
         address _tokenAddr,
         string memory _tokenName,
         uint _Amount,
-        address _factoryOwner,
-        address _creator,
         address _aitchToken
     ) public returns (address, address) {
         launchpadID = launchpadID + 1;
         string memory voteTokenName = string.concat(_tokenName, "VoteToken");
-        _creator = msg.sender;
+        address creator = msg.sender;
 
         LaunchPad launchpadName = new LaunchPad(
             _tokenAddr,
             _tokenName,
             factoryOwner,
-            _creator,
+            creator,
             _aitchToken
         );
 
@@ -47,7 +46,6 @@ contract Factory {
             voteTokenName,
             "VT",
             factoryOwner,
-            _creator,
             address(launchpadName),
             _Amount
         );
@@ -59,6 +57,14 @@ contract Factory {
         );
 
         launchpad.push(launchpadName);
+        launchpadPackage memory launchPadDetails;
+        launchPadDetails.LaunchPadId = LaunchPadId;
+        launchPadDetails.LaunchPadcreator = creator;
+        launchPadDetails.launchpadAddress = address(launchpadName);
+        launchPadDetails.launchpadVoteToken = address(voteToken);
+        launchPadDetails.voteTokenSupply = _Amount;
+
+        launchDetails[launchpadID] = launchPadDetails;
         return (address(launchpadName), address(voteToken));
     }
 }

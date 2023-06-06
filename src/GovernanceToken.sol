@@ -6,7 +6,6 @@ import "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 contract GovernanceToken is ERC20 {
     event MintTokens(address _minter, address _to, uint _amount);
 
-    address creator;
     address public admin;
     uint public mintCount;
 
@@ -14,39 +13,30 @@ contract GovernanceToken is ERC20 {
         string memory _name,
         string memory _symbol,
         address _factoryOwner,
-        address _creator,
         address _recipient,
         uint _amount
     ) ERC20(_name, _symbol) {
-        creator = _creator;
         admin = _factoryOwner;
         mintTokens(_recipient, _amount);
+        mintCount = _amount;
     }
 
     function onlyAdmin() internal view {
         require(msg.sender == admin, "Unauthorized Operation");
     }
 
-    function onlyOwner() internal view {
-        require(msg.sender == creator, "Unauthorized Operation");
+    function mintTokens(address _recipient, uint _amount) internal {
+        require(_recipient != address(0), "Invalid Address");
+        _mint(_recipient, _amount);
+        mintCount += _amount;
+
+        emit MintTokens(msg.sender, _recipient, _amount);
     }
 
-    function mintTokens(address _recipient, uint _amount) internal {
-        // require(
-        //     msg.sender == admin || msg.sender == creator,
-        //     "Unauthorized Operation"
-        // );
+    function mintExtra(address _recipient, uint _amount) external {
+        onlyAdmin();
         require(_recipient != address(0), "Invalid Address");
-
-        if (msg.sender == creator) {
-            require(mintCount == 0, "Double Minting");
-            _mint(_recipient, _amount);
-            mintCount = mintCount + 1;
-        } else if (msg.sender == admin) {
-            require(mintCount <= 2, "Mint Limit Exceeded");
-            _mint(_recipient, _amount);
-            mintCount = mintCount + 1;
-        } else return;
+        _mint(_recipient, _amount);
 
         emit MintTokens(msg.sender, _recipient, _amount);
     }
