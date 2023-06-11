@@ -1,0 +1,21 @@
+h1.red {
+  color: green;
+}
+
+.homebg {
+  background-image: url(../images/bg1.png);
+  height: 60vh;
+  background-image: linear-gradient(to right, #bbdefb, #e3f2fd);
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+  padding: 0 4px 0 10px;
+  color: #02265d;
+}
+
+.blockchainbg {
+  height: 100vh;
+  background-image: linear-gradient(to right, #e3f2fd, #90caf9);
+  color: #02265d;
+  /* align-items: center; */
+}
