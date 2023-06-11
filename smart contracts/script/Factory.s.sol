@@ -38,3 +38,4 @@ contract FactoryDeployer is Script {
 // AITCH: 0xd8cab297543d2f5b3b9445Ac4D2cAe12369Be1BF
 // MKK voteToken: 0xC16E0373CfA7f479B333272c978C94aC3e5E45e3
 // MKK Launchpad: 0xc29E157239016e6fea2E9311645abbfa177101C1
+// Parent contract DaoToken: 0x543260Eb58720eA27ddfDA3b1C9AD33e0A4bbe3f (irrelevant)
