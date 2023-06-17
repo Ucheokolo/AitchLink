@@ -14,8 +14,39 @@ h1.red {
 }
 
 .blockchainbg {
-  height: 100vh;
-  background-image: linear-gradient(to right, #e3f2fd, #90caf9);
+  /* height: 100vh; */
+  /* min-h-screen */
+  /* position: fixed; */
+  background: linear-gradient(to right, #90caf9, #bedaee);
+  /* overflow: hidden;
+  background-position: right;
+  background-repeat: no-repeat; */
   color: #02265d;
   /* align-items: center; */
+}
+
+.sectionBlock {
+  display: flex;
+  overflow: hidden;
+  height: 55vh;
+  margin-bottom: 5rem;
+  background: rgb(255, 255, 255, 0.1);
+  z-index: 10;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(15px);
+  box-shadow: -15px 17px 17px rgba(10, 10, 10, 0.25);
+}
+
+.services {
+  height: 40vh;
+  padding: 4px 40px;
+  text-align: justify;
+  margin-bottom: 5rem;
+  background: rgba(238, 233, 233, 0.1);
+  z-index: 10;
+  border-radius: 20px;
+  border: 0.2px solid rgba(233, 220, 220, 0.7);
+  backdrop-filter: blur(25px);
+  box-shadow: -10px 17px 17px rgba(10, 10, 10, 0.25);
 }
