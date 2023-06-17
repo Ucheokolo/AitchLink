@@ -11,7 +11,7 @@ const Navbar = () => {
       <div className="flex justify-between">
         <div>
           <Link href="/">
-            <Image src={logo} width={150} alt="Picture of the author" />
+            <Image src={logo} width={200} alt="Picture of the author" />
           </Link>
         </div>
         <div className="flex gap-3 lg:max-w-7xl md:items-center md:flex ">
@@ -19,7 +19,7 @@ const Navbar = () => {
           <Link href="">About us</Link>
           <Link href="">Services</Link>
           <Link
-            className=" bg-[#E3F2FD] text-[#02265d] px-2 ml-20 rounded-lg"
+            className=" bg-[#E3F2FD] text-[#02265d] text-lg font-semibold hover:-translate-y-px py-2 px-6 ml-20 rounded-lg"
             href="/Blockchain"
           >
             Launch App
