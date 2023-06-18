@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "src/LaunchPad.sol";
-import "src/GovernanceToken.sol";
+import "../src/LaunchPad.sol";
+import "../src/GovernanceToken.sol";
 
 contract Factory {
     address factoryOwner;
     uint launchpadID;
     LaunchPad[] public launchpad;
+    uint[] public launchpadIDs;
+
+    enum state {
+        processing,
+        active,
+        concluded,
+        canceled,
+        suspended
+    }
 
     struct launchpadPackage {
         uint LaunchPadId;
@@ -16,10 +25,10 @@ contract Factory {
         address launchpadAddress;
         address launchpadVoteToken;
         uint voteTokenSupply;
+        state launchpadStatus;
     }
 
-    launchpadPackage[] public launchpadInfo;
-    mapping(uint => launchpadPackage) public launchDetails;
+    mapping(address => launchpadPackage) public launchDetails;
 
     constructor() {
         factoryOwner = msg.sender;
@@ -61,21 +70,22 @@ contract Factory {
         );
 
         launchpad.push(launchpadName);
-        launchpadPackage memory launchPadDetails;
-        launchPadDetails.LaunchPadId = launchpadID;
-        launchPadDetails.Name = string.concat(_tokenName, " Launchpad");
-        launchPadDetails.LaunchPadcreator = creator;
-        launchPadDetails.launchpadAddress = address(launchpadName);
-        launchPadDetails.launchpadVoteToken = address(voteToken);
-        launchPadDetails.voteTokenSupply = _Amount;
+        launchpadPackage memory launchPadDetail;
+        launchPadDetail.LaunchPadId = launchpadID;
+        launchPadDetail.Name = string.concat(_tokenName, " Launchpad");
+        launchPadDetail.LaunchPadcreator = creator;
+        launchPadDetail.launchpadAddress = address(launchpadName);
+        launchPadDetail.launchpadVoteToken = address(voteToken);
+        launchPadDetail.voteTokenSupply = _Amount;
 
-        launchDetails[launchpadID] = launchPadDetails;
+        launchDetails[address(launchpadName)] = launchPadDetail;
+
         return (address(launchpadName), address(voteToken));
     }
 
     function getLauchpadDetails(
-        uint _launchpadId
+        address _launchpadAddr
     ) public view returns (launchpadPackage memory) {
-        return (launchDetails[_launchpadId]);
+        return (launchDetails[_launchpadAddr]);
     }
 }

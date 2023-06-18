@@ -2,8 +2,10 @@
 pragma solidity ^0.8.9;
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "lib/forge-std/src/console.sol";
+import "../lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "../lib/forge-std/src/console.sol";
+
+import "../src/IFactory.sol";
 
 contract LaunchPad {
     ///// Events /////
