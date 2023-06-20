@@ -5,8 +5,6 @@ import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "../lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "../lib/forge-std/src/console.sol";
 
-import "../src/IFactory.sol";
-
 contract LaunchPad {
     ///// Events /////
     event LaunchpadProposed(address _proposer, address _token, uint _time);
@@ -18,6 +16,7 @@ contract LaunchPad {
     event AdminWithdrawal(address _admin, uint _amount, uint _time);
 
     ///// Basic information /////
+    address public factoryContract;
     address public factoryOwner;
     address public launchPadCreator;
     address public aitchToken;
@@ -59,6 +58,7 @@ contract LaunchPad {
     constructor(
         address _tokenAddr,
         string memory _tokenName,
+        address _factoryContract,
         address _factoryOwner,
         address _creator,
         address _aitchToken
@@ -67,6 +67,7 @@ contract LaunchPad {
             0x694AA1769357215DE4FAC081bf1f309aDC325306
         );
         factoryOwner = _factoryOwner; // factory contract deployer
+        factoryContract = _factoryContract;
         launchPadCreator = _creator; // msg.sender calling the function in factory
         launchPadToken = _tokenAddr;
         Name = _tokenName;

@@ -3,10 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "../src/Factory.sol";
-import "src/LaunchpadToken.sol";
-import "src/ILaunchpad.sol";
+import "../src/LaunchpadToken.sol";
+import "../src/ILaunchpad.sol";
 
-import {ITokens} from "src/iToken.sol";
+import {ITokens} from "../src/iToken.sol";
 
 contract FactoryTest is Test {
     Factory public factory;

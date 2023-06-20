@@ -3,29 +3,30 @@ pragma solidity ^0.8.9;
 
 import "../src/LaunchPad.sol";
 import "../src/GovernanceToken.sol";
+import "../src/ILaunchpad.sol";
 
 contract Factory {
     address factoryOwner;
     uint launchpadID;
     LaunchPad[] public launchpad;
-    uint[] public launchpadIDs;
 
-    enum state {
-        processing,
+    enum launchpadStatus {
+        upcoming,
         active,
         concluded,
         canceled,
-        suspended
+        rejected
     }
 
     struct launchpadPackage {
         uint LaunchPadId;
         string Name;
-        address LaunchPadcreator;
+        address launchToken;
         address launchpadAddress;
+        address LaunchPadcreator;
         address launchpadVoteToken;
-        uint voteTokenSupply;
-        state launchpadStatus;
+        uint tokenSupply;
+        launchpadStatus status;
     }
 
     mapping(address => launchpadPackage) public launchDetails;
@@ -41,12 +42,13 @@ contract Factory {
         address _aitchToken
     ) public returns (address, address) {
         launchpadID = launchpadID + 1;
-        string memory voteTokenName = string.concat(_tokenName, "VoteToken");
-        address creator = msg.sender;
+        string memory voteTokenName = string.concat(_tokenName, " VoteToken");
+        address creator = msg.sender; // if you dont initialiaze here, contract becomes msg.sender for external call.
 
-        LaunchPad launchpadName = new LaunchPad(
+        LaunchPad launchpadContract = new LaunchPad(
             _tokenAddr,
             _tokenName,
+            address(this),
             factoryOwner,
             creator,
             _aitchToken
@@ -54,33 +56,38 @@ contract Factory {
 
         IERC20(_tokenAddr).transferFrom(
             msg.sender,
-            address(launchpadName),
+            address(launchpadContract),
             _Amount
         );
         require(
-            IERC20(_tokenAddr).balanceOf(address(launchpadName)) > 0,
+            IERC20(_tokenAddr).balanceOf(address(launchpadContract)) > 0,
             "Deposit Your Token"
         );
         GovernanceToken voteToken = new GovernanceToken(
             voteTokenName,
             "VT",
             factoryOwner,
-            address(launchpadName),
+            address(launchpadContract),
             _Amount
         );
 
-        launchpad.push(launchpadName);
+        launchpad.push(launchpadContract);
+
         launchpadPackage memory launchPadDetail;
         launchPadDetail.LaunchPadId = launchpadID;
         launchPadDetail.Name = string.concat(_tokenName, " Launchpad");
         launchPadDetail.LaunchPadcreator = creator;
-        launchPadDetail.launchpadAddress = address(launchpadName);
+        launchPadDetail.launchpadAddress = address(launchpadContract);
         launchPadDetail.launchpadVoteToken = address(voteToken);
-        launchPadDetail.voteTokenSupply = _Amount;
+        launchPadDetail.tokenSupply = _Amount;
 
-        launchDetails[address(launchpadName)] = launchPadDetail;
+        launchDetails[address(launchpadContract)] = launchPadDetail;
 
-        return (address(launchpadName), address(voteToken));
+        return (address(launchpadContract), address(voteToken));
+    }
+
+    function activateLaunchpad(address _launchpadAddress) public {
+        ILaunchpad(_launchpadAddress).activateLaunchpad();
     }
 
     function getLauchpadDetails(
