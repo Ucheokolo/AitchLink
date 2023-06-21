@@ -2,8 +2,9 @@
 pragma solidity ^0.8.9;
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "lib/forge-std/src/console.sol";
+import "../lib/foundry-starter-kit/lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "../lib/forge-std/src/console.sol";
+import "../src/Ifactory.sol";
 
 contract LaunchPad {
     ///// Events /////
@@ -16,6 +17,7 @@ contract LaunchPad {
     event AdminWithdrawal(address _admin, uint _amount, uint _time);
 
     ///// Basic information /////
+    address public factoryContract;
     address public factoryOwner;
     address public launchPadCreator;
     address public aitchToken;
@@ -57,14 +59,17 @@ contract LaunchPad {
     constructor(
         address _tokenAddr,
         string memory _tokenName,
+        address _factoryContract,
         address _factoryOwner,
         address _creator,
         address _aitchToken
     ) {
         ethPriceFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
+            // 0x694AA1769357215DE4FAC081bf1f309aDC325306
+            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
         );
         factoryOwner = _factoryOwner; // factory contract deployer
+        factoryContract = _factoryContract;
         launchPadCreator = _creator; // msg.sender calling the function in factory
         launchPadToken = _tokenAddr;
         Name = _tokenName;
@@ -77,6 +82,10 @@ contract LaunchPad {
 
     function admin() internal view {
         require(msg.sender == factoryOwner, "Unauthorized Operation");
+    }
+
+    function activatePermit() internal view {
+        require(msg.sender == factoryContract, "Unauthorized Operation");
     }
 
     function creatorAdmin() internal view {
@@ -116,8 +125,8 @@ contract LaunchPad {
 
     ///// Write functions /////
 
-    function activateLaunchpad() public {
-        admin();
+    function activateLaunchpad(uint _duration) public {
+        activatePermit();
         launchPadTokenSupply = IERC20(launchPadToken).balanceOf(address(this));
         require(launchPadTokenSupply > 0, "No Lauchpad token");
         launchpadDetails memory _launch;
@@ -125,7 +134,7 @@ contract LaunchPad {
         _launch.token = launchPadToken;
         _launch.launchStart = block.timestamp;
         _launch.totalSupply = launchPadTokenSupply;
-        _launch.duration = 2 days;
+        _launch.duration = _duration;
         _launch.launchEnd = block.timestamp + 2 days;
         _launch.launchpadStatus = status.active;
 
@@ -167,7 +176,7 @@ contract LaunchPad {
     }
 
     function cancelLaunchpad() public {
-        admin();
+        activatePermit();
         status contractStatus = launchpadDetail.launchpadStatus;
         require(
             contractStatus != status.canceled ||
@@ -181,7 +190,7 @@ contract LaunchPad {
     }
 
     function suspendLaunchpad() public {
-        admin();
+        activatePermit();
         if (launchpadDetail.launchpadStatus == status.active) {
             launchpadDetail.launchpadStatus = status.suspended;
         } else if (launchpadDetail.launchpadStatus == status.suspended) {
@@ -230,6 +239,7 @@ contract LaunchPad {
 
         if (block.timestamp > startTime + duration) {
             launchpadDetail.launchpadStatus = status.concluded;
+            IFactory(factoryContract).setConclude(address(this));
         }
         require(
             launchpadDetail.launchpadStatus == status.active,
@@ -242,7 +252,12 @@ contract LaunchPad {
 
         if (block.timestamp > duration) {
             if (launchpadDetail.launchpadStatus != status.canceled) {
+                if (launchpadDetail.launchpadStatus == status.suspended)
+                    revert("Sales Suspended");
+            }
+            if (launchpadDetail.launchpadStatus != status.concluded) {
                 launchpadDetail.launchpadStatus = status.concluded;
+                IFactory(factoryContract).setConclude(address(this));
             }
         }
 

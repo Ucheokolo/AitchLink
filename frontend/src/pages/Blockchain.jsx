@@ -22,7 +22,7 @@ const Blockchain = () => {
             <h3 className="font-semibold text-[#43447e] text-xl pb-6">
               Unlocking Efficiency, Empowering Startups
             </h3>
-            <p className="leading-8 text-xl">
+            <p className="leading-8 text-xl text-justify">
               AitchBlock is an AitchLink Decentralized application at the
               forefront of the blockchain revolution, offering comprehensive
               crypto launchpad, exchange, and peer to peer(P2P) services. Our

@@ -3,10 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "../src/Factory.sol";
-import "src/LaunchpadToken.sol";
-import "src/ILaunchpad.sol";
+import "../src/LaunchpadToken.sol";
+import "../src/ILaunchpad.sol";
 
-import {ITokens} from "src/iToken.sol";
+import {ITokens} from "../src/iToken.sol";
 
 contract FactoryTest is Test {
     Factory public factory;
@@ -60,7 +60,7 @@ contract FactoryTest is Test {
             40 ether,
             address(Aitch)
         );
-        factory.getLauchpadDetails(1);
+        factory.getLauchpadDetails(address(launchpad));
         ILaunchpad(address(launchpad)).launchPadStatus();
         IERC20(address(voteToken)).balanceOf(address(launchpad));
         vm.stopPrank();
@@ -68,8 +68,12 @@ contract FactoryTest is Test {
 
     function testActivateLaunchpad() public {
         testCreateLaunchpad();
-        vm.prank(factoryOwner);
-        ILaunchpad(address(launchpad)).activateLaunchpad();
+        vm.startPrank(factoryOwner);
+        // factory.setReject(address(launchpad));
+        factory.activateLaunchpad(address(launchpad), 2 days);
+        factory.getLauchpadDetails(address(launchpad));
+        // ILaunchpad(address(launchpad)).activateLaunchpad(2 days);
+        vm.stopPrank();
     }
 
     function testInvestLaunchpad() public returns (uint) {
@@ -117,8 +121,9 @@ contract FactoryTest is Test {
 
         vm.prank(factoryOwner);
         // ILaunchpad(address(launchpad)).cancelLaunchpad();
+        factory.cancelLaunchpad(address(launchpad));
 
-        ILaunchpad(address(launchpad)).launchPadStatus();
+        // ILaunchpad(address(launchpad)).launchPadStatus();
 
         return (aitchBal);
 
@@ -153,6 +158,8 @@ contract FactoryTest is Test {
 
         ILaunchpad(address(launchpad)).launchpadInfo();
         ILaunchpad(address(launchpad)).launchpadName();
+
+        factory.getLaunchpadSize();
 
         return remaining;
     }
