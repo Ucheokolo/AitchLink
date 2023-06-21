@@ -14,7 +14,7 @@ interface ILaunchpad {
 
     function hasClaimed(address _investor) external;
 
-    function activateLaunchpad() external;
+    function activateLaunchpad(uint _duration) external;
 
     function investAitch(uint _amount) external;
 
