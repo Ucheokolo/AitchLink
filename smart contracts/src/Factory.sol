@@ -100,15 +100,15 @@ contract Factory {
         require(currentState != launchpadCondition.rejected, "Failed Review");
         launchpadSummary memory launchPadDetail;
         launchPadDetail.status = launchpadCondition.active;
-        launchPadDetail = launchDetails[_launchpadAddress];
+        launchDetails[_launchpadAddress] = launchPadDetail;
 
         ILaunchpad(_launchpadAddress).activateLaunchpad(_duration);
     }
 
     function setConclude(address _launchpadAddress) public {
-        launchpadSummary memory launchPadDetail;
         address callerPermit = _launchpadAddress;
         require(msg.sender == callerPermit, "Unauthorized Operation");
+        launchpadSummary memory launchPadDetail;
         launchPadDetail.status = launchpadCondition.concluded;
         launchDetails[_launchpadAddress] = launchPadDetail;
     }
@@ -122,7 +122,7 @@ contract Factory {
         require(msg.sender == factoryOwner, "Unauthorized Operation");
         launchpadSummary memory launchPadDetail;
         launchPadDetail.status = launchpadCondition.canceled;
-        launchPadDetail = launchDetails[_launchpadAddress];
+        launchDetails[_launchpadAddress] = launchPadDetail;
         ILaunchpad(_launchpadAddress).cancelLaunchpad();
     }
 
@@ -141,5 +141,9 @@ contract Factory {
         address _launchpadAddr
     ) public view returns (launchpadSummary memory) {
         return (launchDetails[_launchpadAddr]);
+    }
+
+    function getOwner() public view returns (address) {
+        return factoryOwner;
     }
 }

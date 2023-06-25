@@ -65,8 +65,8 @@ contract LaunchPad {
         address _aitchToken
     ) {
         ethPriceFeed = AggregatorV3Interface(
-            // 0x694AA1769357215DE4FAC081bf1f309aDC325306
-            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+            0x694AA1769357215DE4FAC081bf1f309aDC325306
+            // 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
         );
         factoryOwner = _factoryOwner; // factory contract deployer
         factoryContract = _factoryContract;
@@ -104,13 +104,12 @@ contract LaunchPad {
         return (string.concat(tokenName, " Launchpad"));
     }
 
-    function launchPadTokenSupply_() public view returns (uint) {
+    function getLaunchPadTokenSupply_() public view returns (uint) {
         return launchPadTokenSupply;
     }
 
     function launchPadStatus() public view returns (status) {
-        status currentStatus = launchpadDetail.launchpadStatus;
-        return currentStatus;
+        return launchpadDetail.launchpadStatus;
     }
 
     function getUserInvestment() public view returns (uint, uint) {
