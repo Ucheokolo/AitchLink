@@ -18,17 +18,17 @@ contract FactoryDeployer is Script {
 
     function run() public {
         vm.startBroadcast(deployerPrivateKey);
-        // factoryContract = new Factory();
-        // launchToken = new LaunchpadToken("Suite", "ST");
+        factoryContract = new Factory();
+        launchToken = new LaunchpadToken("Faith", "FT");
 
-        launchpad = new LaunchPad(
-            0x84563ef43852B575Aa6b48881aE79D79F133D92c,
-            "Suite",
-            0xD40Fcb27FB75A938F023EE23839744659Ca51463,
-            0x9CE29Ba0c9680561e2EB21B8776a98f13786B2e3,
-            0x194e43c87560861168f18C811B0E9EB64Ba18233,
-            0xd8cab297543d2f5b3b9445Ac4D2cAe12369Be1BF
-        );
+        // launchpad = new LaunchPad(
+        //     0xA131A46dbcEd42Dc7f08D11381d712711361CDDE,
+        //     "Legacy",
+        //     0x40C1A565c7516145369AEf1E6438B1d1D47464d1,
+        //     0x9CE29Ba0c9680561e2EB21B8776a98f13786B2e3,
+        //     0x194e43c87560861168f18C811B0E9EB64Ba18233,
+        //     0xd8cab297543d2f5b3b9445Ac4D2cAe12369Be1BF
+        // );
         // aitch = new AitchToken("AitchLink", "AL");
         // daoToken = new GovernanceToken(
         //     "daoT",
