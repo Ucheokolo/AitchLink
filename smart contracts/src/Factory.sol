@@ -98,19 +98,15 @@ contract Factory {
         launchpadCondition currentState = launchDetails[_launchpadAddress]
             .status;
         require(currentState != launchpadCondition.rejected, "Failed Review");
-        launchpadSummary memory launchPadDetail;
-        launchPadDetail.status = launchpadCondition.active;
-        launchPadDetail = launchDetails[_launchpadAddress];
+        launchDetails[_launchpadAddress].status = launchpadCondition.active;
 
         ILaunchpad(_launchpadAddress).activateLaunchpad(_duration);
     }
 
     function setConclude(address _launchpadAddress) public {
-        launchpadSummary memory launchPadDetail;
         address callerPermit = _launchpadAddress;
         require(msg.sender == callerPermit, "Unauthorized Operation");
-        launchPadDetail.status = launchpadCondition.concluded;
-        launchDetails[_launchpadAddress] = launchPadDetail;
+        launchDetails[_launchpadAddress].status = launchpadCondition.concluded;
     }
 
     function suspendLaunchpad(address _launchpadAddress) public {
@@ -120,26 +116,30 @@ contract Factory {
 
     function cancelLaunchpad(address _launchpadAddress) public {
         require(msg.sender == factoryOwner, "Unauthorized Operation");
-        launchpadSummary memory launchPadDetail;
-        launchPadDetail.status = launchpadCondition.canceled;
-        launchPadDetail = launchDetails[_launchpadAddress];
+        launchDetails[_launchpadAddress].status = launchpadCondition.canceled;
         ILaunchpad(_launchpadAddress).cancelLaunchpad();
     }
 
     function setReject(address _launchpadAddress) public {
         require(msg.sender == factoryOwner, "Unauthorized Operation");
-        launchpadSummary memory _launchPadDetail;
-        _launchPadDetail.status = launchpadCondition.rejected;
-        launchDetails[_launchpadAddress] = _launchPadDetail;
+        launchDetails[_launchpadAddress].status = launchpadCondition.rejected;
     }
 
     function getLaunchpadSize() public view returns (uint) {
         return (launchpad.length);
     }
 
+    function getLaunchpads() public view returns (LaunchPad[] memory) {
+        return (launchpad);
+    }
+
     function getLauchpadDetails(
         address _launchpadAddr
     ) public view returns (launchpadSummary memory) {
         return (launchDetails[_launchpadAddr]);
+    }
+
+    function getOwner() public view returns (address) {
+        return factoryOwner;
     }
 }

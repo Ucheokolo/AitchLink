@@ -17,7 +17,34 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_launchpadId", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "_launchpadAddress",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_duration", "type": "uint256" }
+    ],
+    "name": "activateLaunchpad",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_launchpadAddress",
+        "type": "address"
+      }
+    ],
+    "name": "cancelLaunchpad",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_launchpadAddr", "type": "address" }
     ],
     "name": "getLauchpadDetails",
     "outputs": [
@@ -31,7 +58,7 @@
           { "internalType": "string", "name": "Name", "type": "string" },
           {
             "internalType": "address",
-            "name": "LaunchPadcreator",
+            "name": "launchToken",
             "type": "address"
           },
           {
@@ -41,16 +68,26 @@
           },
           {
             "internalType": "address",
+            "name": "LaunchPadcreator",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
             "name": "launchpadVoteToken",
             "type": "address"
           },
           {
             "internalType": "uint256",
-            "name": "voteTokenSupply",
+            "name": "tokenSupply",
             "type": "uint256"
+          },
+          {
+            "internalType": "enum Factory.launchpadCondition",
+            "name": "status",
+            "type": "uint8"
           }
         ],
-        "internalType": "struct Factory.launchpadPackage",
+        "internalType": "struct Factory.launchpadSummary",
         "name": "",
         "type": "tuple"
       }
@@ -59,16 +96,36 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "inputs": [],
+    "name": "getLaunchpadSize",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getOwner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "address", "name": "", "type": "address" }
+    ],
+    "name": "isOwner",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "launchDetails",
     "outputs": [
       { "internalType": "uint256", "name": "LaunchPadId", "type": "uint256" },
       { "internalType": "string", "name": "Name", "type": "string" },
-      {
-        "internalType": "address",
-        "name": "LaunchPadcreator",
-        "type": "address"
-      },
+      { "internalType": "address", "name": "launchToken", "type": "address" },
       {
         "internalType": "address",
         "name": "launchpadAddress",
@@ -76,13 +133,19 @@
       },
       {
         "internalType": "address",
-        "name": "launchpadVoteToken",
+        "name": "LaunchPadcreator",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "voteTokenSupply",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "launchpadVoteToken",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "tokenSupply", "type": "uint256" },
+      {
+        "internalType": "enum Factory.launchpadCondition",
+        "name": "status",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -98,33 +161,42 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "name": "launchpadInfo",
-    "outputs": [
-      { "internalType": "uint256", "name": "LaunchPadId", "type": "uint256" },
-      { "internalType": "string", "name": "Name", "type": "string" },
+    "inputs": [
       {
         "internalType": "address",
-        "name": "LaunchPadcreator",
+        "name": "_launchpadAddress",
         "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "launchpadAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "launchpadVoteToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "voteTokenSupply",
-        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "setConclude",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_launchpadAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setReject",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_launchpadAddress",
+        "type": "address"
+      }
+    ],
+    "name": "suspendLaunchpad",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
