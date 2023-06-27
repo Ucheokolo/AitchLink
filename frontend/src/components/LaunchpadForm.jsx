@@ -7,23 +7,48 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 import FactoryAbi from "../API/Factory.json";
+import AitchAbi from "../API/Aitch.json";
 import Addresses from "../API/addresses.json";
 import { Box, TextField } from "@mui/material";
 
 const LaunchpadForm = () => {
   const aitchAddress = Addresses.aitchAddress;
+  const factoryAddress = Addresses.factoryAddress;
 
   const [tokenAddress, setTokenAddress] = useState("");
   const [tokenName, setTokenName] = useState("");
   const [tokenAmount, setTokenAmount] = useState();
 
+  const { config: approveConfig } = usePrepareContractWrite({
+    address: aitchAddress,
+    abi: AitchAbi,
+    functionName: "approve",
+    args: [
+      factoryAddress,
+      ethers.parseEther(tokenAmount ? String(tokenAmount) : "0"),
+    ],
+  });
+  const {
+    data: approveData,
+    isLoading: isLoadingApprove,
+    isSuccess: isSuccessApprove,
+    write: approve,
+  } = useContractWrite(approveConfig);
+  const {
+    data: DataApprove,
+    isError: isErrorApprove,
+    isLoading: ApproveLoading,
+  } = useWaitForTransaction({
+    hash: approveData?.hash,
+  });
+
   const { config: createLaunchpadConfig } = usePrepareContractWrite({
-    address: Addresses.factoryAddress,
+    address: factoryAddress,
     abi: FactoryAbi,
     functionName: "CreateLaunchpad",
     args: [
-      tokenAddress,
-      tokenName,
+      tokenAddress ?? "",
+      tokenName ?? "",
       ethers.parseEther(tokenAmount ? String(tokenAmount) : "0"),
       aitchAddress,
     ],
@@ -40,6 +65,7 @@ const LaunchpadForm = () => {
 
   return (
     <div>
+      <div>{tokenName}</div>
       <Box
         component="form"
         sx={{
@@ -63,12 +89,24 @@ const LaunchpadForm = () => {
             />
           </div>
           <div>
-            <TextField required id="outlined-required" label="Token Name" />
+            <TextField
+              required
+              id="outlined-required"
+              label="Token Name"
+              value={tokenName}
+              onChange={(e) => {
+                setTokenName(e.target.value);
+              }}
+            />
             <TextField
               required
               id="outlined-required"
               label="Token Address"
               defaultValue="0x687.....8976"
+              value={tokenAddress}
+              onChange={(e) => {
+                setTokenAddress(e.target.value);
+              }}
             />
           </div>
           <div>
@@ -77,6 +115,10 @@ const LaunchpadForm = () => {
               id="outlined-required"
               label="Token Supply"
               type="number"
+              value={tokenAmount}
+              onChange={(e) => {
+                setTokenAmount(e.target.value);
+              }}
             />
             <TextField
               required
