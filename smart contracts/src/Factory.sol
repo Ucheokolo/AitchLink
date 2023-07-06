@@ -10,6 +10,8 @@ contract Factory {
     address factoryOwner;
     uint launchpadID;
     LaunchPad[] public launchpad;
+    mapping(address => bool) public existingCreator;
+    mapping(address => bool) public existingLaunchToken;
 
     enum launchpadCondition {
         upcoming,
@@ -23,6 +25,7 @@ contract Factory {
         uint LaunchPadId;
         string Name;
         address launchToken;
+        string tokenCid;
         address launchpadAddress;
         address LaunchPadcreator;
         address launchpadVoteToken;
@@ -32,6 +35,7 @@ contract Factory {
 
     mapping(address => launchpadSummary) public launchDetails;
     mapping(address => mapping(address => bool)) public isOwner;
+    launchpadSummary[] public allLaunchpad;
 
     constructor() {
         factoryOwner = msg.sender;
@@ -40,9 +44,12 @@ contract Factory {
     function CreateLaunchpad(
         address _tokenAddr,
         string memory _tokenName,
+        string memory _cid,
         uint _Amount,
         address _aitchToken
     ) public returns (address, address) {
+        // require(existingCreator[msg.sender] == false, "Creator Exists");
+        // require(existingLaunchToken[_tokenAddr] == false, "Launchpad Exists");
         launchpadID = launchpadID + 1;
         string memory voteTokenName = string.concat(_tokenName, " VoteToken");
         address creator = msg.sender; // if you dont initialiaze here, contract becomes msg.sender for external call.
@@ -50,22 +57,26 @@ contract Factory {
         LaunchPad launchpadContract = new LaunchPad(
             _tokenAddr,
             _tokenName,
+            _cid,
             address(this),
             factoryOwner,
             creator,
             _aitchToken
         );
-        isOwner[address(launchpadContract)][msg.sender] = true;
+        existingCreator[msg.sender] = true;
+        existingLaunchToken[_tokenAddr] = true;
+        // isOwner[address(launchpadContract)][msg.sender] = true;
 
         IERC20(_tokenAddr).transferFrom(
             msg.sender,
             address(launchpadContract),
             _Amount
         );
-        require(
-            IERC20(_tokenAddr).balanceOf(address(launchpadContract)) > 0,
-            "Deposit Your Token"
-        );
+        // require(
+        //     IERC20(_tokenAddr).balanceOf(address(launchpadContract)) > 0,
+        //     "Deposit Your Token"
+        // );
+
         GovernanceToken voteToken = new GovernanceToken(
             voteTokenName,
             "VT",
@@ -80,12 +91,14 @@ contract Factory {
         launchPadDetail.LaunchPadId = launchpadID;
         launchPadDetail.Name = string.concat(_tokenName, " Launchpad");
         launchPadDetail.launchToken = _tokenAddr;
+        launchPadDetail.tokenCid = _cid;
         launchPadDetail.LaunchPadcreator = creator;
         launchPadDetail.launchpadAddress = address(launchpadContract);
         launchPadDetail.launchpadVoteToken = address(voteToken);
         launchPadDetail.tokenSupply = _Amount;
 
         launchDetails[address(launchpadContract)] = launchPadDetail;
+        allLaunchpad.push(launchDetails[address(launchpadContract)]);
 
         return (address(launchpadContract), address(voteToken));
     }
@@ -129,8 +142,12 @@ contract Factory {
         return (launchpad.length);
     }
 
-    function getLaunchpads() public view returns (LaunchPad[] memory) {
+    function getAllAddresses() public view returns (LaunchPad[] memory) {
         return (launchpad);
+    }
+
+    function getAllLaunchpad() public view returns (launchpadSummary[] memory) {
+        return (allLaunchpad);
     }
 
     function getLauchpadDetails(
@@ -141,5 +158,12 @@ contract Factory {
 
     function getOwner() public view returns (address) {
         return factoryOwner;
+    }
+
+    function getLaunchpadCreator(
+        address _launchpadAddr
+    ) public view returns (address) {
+        address projectCreator = launchDetails[_launchpadAddr].LaunchPadcreator;
+        return (projectCreator);
     }
 }
