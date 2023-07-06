@@ -45,6 +45,7 @@ contract FactoryTest is Test {
         // vm.selectFork(mainnetFork);
         vm.startPrank(factoryOwner);
         token.mintTokens(me, 50 ether);
+        token.mintTokens(inv1, 30 ether);
         Aitch.mintTokens(inv1, 20 ether);
         Aitch.mintTokens(inv2, 20 ether);
         Aitch.mintTokens(inv3, 20 ether);
@@ -57,6 +58,7 @@ contract FactoryTest is Test {
         (launchpad, voteToken) = factory.CreateLaunchpad(
             address(token),
             "Legion",
+            "checkmeout",
             40 ether,
             address(Aitch)
         );
@@ -64,6 +66,17 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).launchPadStatus();
         IERC20(address(voteToken)).balanceOf(address(launchpad));
         vm.stopPrank();
+
+        // vm.startPrank(inv1);
+        // token.approve(address(factory), 20);
+        // (launchpad, voteToken) = factory.CreateLaunchpad(
+        //     address(token),
+        //     "Legion",
+        //     "checkmeout",
+        //     15 ether,
+        //     address(Aitch)
+        // );
+        // vm.stopPrank();
     }
 
     function testActivateLaunchpad() public {
@@ -121,7 +134,7 @@ contract FactoryTest is Test {
 
         vm.prank(factoryOwner);
         // ILaunchpad(address(launchpad)).cancelLaunchpad();
-        factory.cancelLaunchpad(address(launchpad));
+        // factory.cancelLaunchpad(address(launchpad));
 
         // ILaunchpad(address(launchpad)).launchPadStatus();
 
@@ -136,6 +149,13 @@ contract FactoryTest is Test {
         testInvestLaunchpad();
         vm.warp(block.timestamp + 5 days);
         ILaunchpad(address(launchpad)).launchPadStatus();
+
+        vm.startPrank(inv4);
+        Aitch.approve(address(launchpad), 6 ether);
+        ILaunchpad(address(launchpad)).investAitch(3 ether);
+        vm.stopPrank();
+        ILaunchpad(address(launchpad)).launchPadStatus();
+
         vm.prank(inv3);
         ILaunchpad(address(launchpad)).claimTokens();
 
@@ -160,6 +180,10 @@ contract FactoryTest is Test {
         ILaunchpad(address(launchpad)).launchpadName();
 
         factory.getLaunchpadSize();
+        factory.getAllAddresses();
+        factory.getAllLaunchpad();
+        factory.getLaunchpadCreator(address(launchpad));
+        factory.getLauchpadDetails(address(launchpad));
 
         return remaining;
     }

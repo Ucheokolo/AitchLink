@@ -23,6 +23,7 @@ contract LaunchPad {
     address public aitchToken;
     address public launchPadToken;
     string public Name;
+    string private lCid;
     uint public launchPadTokenSupply;
     AggregatorV3Interface internal ethPriceFeed;
 
@@ -39,6 +40,7 @@ contract LaunchPad {
     struct launchpadDetails {
         string name;
         address token;
+        string tokenCid;
         uint totalSupply;
         uint launchStart;
         uint duration;
@@ -59,20 +61,22 @@ contract LaunchPad {
     constructor(
         address _tokenAddr,
         string memory _tokenName,
+        string memory _lCid,
         address _factoryContract,
         address _factoryOwner,
         address _creator,
         address _aitchToken
     ) {
         ethPriceFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
-            // 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+            // 0x694AA1769357215DE4FAC081bf1f309aDC325306
+            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
         );
         factoryOwner = _factoryOwner; // factory contract deployer
         factoryContract = _factoryContract;
         launchPadCreator = _creator; // msg.sender calling the function in factory
         launchPadToken = _tokenAddr;
         Name = _tokenName;
+        lCid = _lCid;
         aitchToken = _aitchToken;
         emit LaunchpadProposed(msg.sender, launchPadToken, block.timestamp);
     }
@@ -130,6 +134,7 @@ contract LaunchPad {
         require(launchPadTokenSupply > 0, "No Lauchpad token");
         launchpadDetails memory _launch;
         _launch.name = Name;
+        _launch.tokenCid = lCid;
         _launch.token = launchPadToken;
         _launch.launchStart = block.timestamp;
         _launch.totalSupply = launchPadTokenSupply;
@@ -142,22 +147,38 @@ contract LaunchPad {
         emit LaunchpadActivated(msg.sender, block.timestamp);
     }
 
-    function investAitch(uint _amount) public {
+    function investAitch(
+        uint _amount
+    ) public returns (string memory _returnMsg) {
+        uint startTime = launchpadDetail.launchStart;
+        uint duration = launchpadDetail.duration;
+        require(
+            launchpadDetail.launchpadStatus != status.concluded,
+            "Launchpad Concluded"
+        );
         require(
             IERC20(aitchToken).balanceOf(msg.sender) > 0,
             "Insufficient Fund"
         );
         investConditions();
-        IERC20(aitchToken).transferFrom(msg.sender, address(this), _amount);
-        Investor[msg.sender] = true;
-        aitchInvestment[msg.sender] += _amount;
-
-        emit UserInvestment(msg.sender, _amount);
+        if (launchpadDetail.launchpadStatus == status.concluded) {
+            return ("Launchpad Concluded");
+        }
+        if (block.timestamp < startTime + duration) {
+            IERC20(aitchToken).transferFrom(msg.sender, address(this), _amount);
+            Investor[msg.sender] = true;
+            aitchInvestment[msg.sender] += _amount;
+            emit UserInvestment(msg.sender, _amount);
+            return ("Success!!");
+        }
     }
 
-    function investEther() public payable {
+    function investEther() public payable returns (string memory _returnMsg) {
         require(msg.value > 0, "Insuficient Fund");
         investConditions();
+        if (launchpadDetail.launchpadStatus == status.concluded) {
+            return ("Launchpad Concluded");
+        }
 
         Investor[msg.sender] = true;
         etherInvestment[msg.sender] = msg.value;
@@ -240,10 +261,6 @@ contract LaunchPad {
             launchpadDetail.launchpadStatus = status.concluded;
             IFactory(factoryContract).setConclude(address(this));
         }
-        require(
-            launchpadDetail.launchpadStatus == status.active,
-            "launchpad Concluded"
-        );
     }
 
     function userWithdrawCondition() internal {
