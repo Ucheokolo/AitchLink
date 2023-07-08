@@ -48,8 +48,8 @@ contract Factory {
         uint _Amount,
         address _aitchToken
     ) public returns (address, address) {
-        // require(existingCreator[msg.sender] == false, "Creator Exists");
-        // require(existingLaunchToken[_tokenAddr] == false, "Launchpad Exists");
+        require(existingCreator[msg.sender] == false, "Creator Exists");
+        require(existingLaunchToken[_tokenAddr] == false, "Launchpad Exists");
         launchpadID = launchpadID + 1;
         string memory voteTokenName = string.concat(_tokenName, " VoteToken");
         address creator = msg.sender; // if you dont initialiaze here, contract becomes msg.sender for external call.

@@ -68,8 +68,10 @@ contract LaunchPad {
         address _aitchToken
     ) {
         ethPriceFeed = AggregatorV3Interface(
-            // 0x694AA1769357215DE4FAC081bf1f309aDC325306
-            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+            // sepolia testnet aggregator for deploying to testnet
+            0x694AA1769357215DE4FAC081bf1f309aDC325306
+            // mainnet aggregator for testing
+            // 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
         );
         factoryOwner = _factoryOwner; // factory contract deployer
         factoryContract = _factoryContract;
@@ -199,7 +201,7 @@ contract LaunchPad {
         activatePermit();
         status contractStatus = launchpadDetail.launchpadStatus;
         require(
-            contractStatus != status.canceled ||
+            contractStatus != status.canceled &&
                 contractStatus != status.concluded,
             "Launchpad Finalized"
         );

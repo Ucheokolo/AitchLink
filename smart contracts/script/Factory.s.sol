@@ -18,14 +18,14 @@ contract FactoryDeployer is Script {
 
     function run() public {
         vm.startBroadcast(deployerPrivateKey);
-        // factoryContract = new Factory();
-        // launchToken = new LaunchpadToken("Avengers", "AVG");
+        factoryContract = new Factory();
+        // launchToken = new LaunchpadToken("Shots", "ST");
 
         launchpad = new LaunchPad(
-            0xb920C6d940a875696D28f6A64DDaCc2E71Ba0eaA,
-            "Avengers",
-            "ahsjdjgfj",
-            0x92B563f6D9D2819c3249da678d299D4Da2Bd1200,
+            0xF89A6eD3d82A274D7E0a2C1660b058e9D38166b4,
+            "Shots",
+            "ahs12yty437jdjgfj",
+            0x83cb6d9484D73E1c6b1059980634aAAefea646ED,
             0x9CE29Ba0c9680561e2EB21B8776a98f13786B2e3,
             0x194e43c87560861168f18C811B0E9EB64Ba18233,
             0xd8cab297543d2f5b3b9445Ac4D2cAe12369Be1BF
@@ -43,7 +43,7 @@ contract FactoryDeployer is Script {
     }
 }
 
-// FACTORY :0x92B563f6D9D2819c3249da678d299D4Da2Bd1200
+// FACTORY :0xf3BB933d05f5EF0310D9E0c49ab8734864b2a23B
 // AITCH: 0xd8cab297543d2f5b3b9445Ac4D2cAe12369Be1BF
 // MKK voteToken: 0xC16E0373CfA7f479B333272c978C94aC3e5E45e3
 // AVG Launchpad: 0x444F08C39310e7e4A9B54e6d8B9a3560a033745c
