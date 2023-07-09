@@ -1,5 +1,6 @@
 import React from "react";
 import DAppsNavbar from "@/components/DAppsNavbar";
+import AitchBlockNavbar from "@/components/AitchBlockNavbar";
 import styles from "../styles/styles.module.css";
 import Image from "next/image";
 import pic from "../images/blk1.png";
@@ -11,7 +12,7 @@ const Blockchain = () => {
   return (
     <div className={styles.blockchainbg}>
       <div className="h-32 w-32 truncate rounded-full fixed top-6 right-6 bg-white"></div>
-      <DAppsNavbar />
+      <AitchBlockNavbar />
       <div className="px-24 relative">
         <div className={styles.sectionBlock}>
           <div>

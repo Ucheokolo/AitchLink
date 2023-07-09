@@ -21,11 +21,19 @@ const Launchpad = () => {
       </div>
       <DAppsNavbar />
       <div className="px-24 flex gap-4">
-        <div className=" w-11/12 bg-[#ffffff1a] z-10 rounded-lg border-solid border-1 border-[#ffffffc4] backdrop-blur-lg shadow-lg shadow-[#0a0a0a40]">
+        <div className="w-4/5 bg-[#ffffff1a] z-10 rounded-lg border-solid border-1 border-[#ffffffc4] backdrop-blur-lg shadow-lg shadow-[#0a0a0a40]">
+          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
+          <p>Where Innovation Takes Flight</p>
+          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
+          <p>Where Innovation Takes Flight</p>
+          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
+          <p>Where Innovation Takes Flight</p>
+          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
+          <p>Where Innovation Takes Flight</p>
           <h1 className="font-bold text-4xl">Aitch-Pad</h1>
           <p>Where Innovation Takes Flight</p>
         </div>
-        <div className=" text-center bg-[#ffffff1a] z-10 rounded-lg border-solid border-1 border-[#ffffffc4] backdrop-blur-sm shadow-lg shadow-[#0a0a0a40]">
+        <div className=" w-1/5 py-8 text-center bg-[#ffffff1a] z-10 rounded-lg border-solid border-1 border-[#ffffffc4] backdrop-blur-sm shadow-lg shadow-[#0a0a0a40]">
           <LaunchpadForm />
         </div>
       </div>
