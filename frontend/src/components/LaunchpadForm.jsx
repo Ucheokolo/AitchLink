@@ -58,7 +58,7 @@ const LaunchpadForm = () => {
     abi: AitchAbi,
     functionName: "allowance",
     args: [user, factoryAddress],
-    watch: true,
+    // watch: true,
     onSuccess(allowanceData) {
       console.log("Success", Number(allowanceData));
       setAllowance(Number(allowanceData));
@@ -194,7 +194,7 @@ const LaunchpadForm = () => {
       >
         Register
         <svg
-          class="w-3.5 h-3.5 ml-2"
+          className="w-3.5 h-3.5 ml-2"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

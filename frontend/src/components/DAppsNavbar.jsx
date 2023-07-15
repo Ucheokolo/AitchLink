@@ -15,16 +15,27 @@ const DAppsNavbar = () => {
       <div className="flex gap-48 text-[#02265d]">
         <div className="flex gap-4 justify-center justify-items-center mt-1 text-lg">
           <Link
-            className="hover:underline underline-offset-4"
-            href="/Launchpad"
+            className=" hover:bg-[#edf1f8] font-bold bg-white px-1 rounded-lg m-auto"
+            href="/Blockchain"
           >
-            Launchpad
-          </Link>
-          <Link className="hover:underline underline-offset-4" href="">
-            Swap
-          </Link>
-          <Link className="hover:underline underline-offset-4" href="">
-            P2P
+            <button>
+              <svg
+                className="w-3.5 h-3.5 ml-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 14 10"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M1 5h12M1 5l4-4m-4 4l4 4"
+                />
+              </svg>
+            </button>
+            Aitch Block
           </Link>
         </div>
         <ConnectButton />
