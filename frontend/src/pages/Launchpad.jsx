@@ -6,6 +6,7 @@ import Image from "next/image";
 import bg from "../images/lpmbg.png";
 import ast from "../images/lpbg.png";
 import LaunchpadForm from "@/components/LaunchpadForm";
+import ActiveLaunchpad from "./ActiveLaunchpad";
 
 const Launchpad = () => {
   return (
@@ -24,14 +25,7 @@ const Launchpad = () => {
         <div className="w-4/5 bg-[#ffffff1a] z-10 rounded-lg border-solid border-1 border-[#ffffffc4] backdrop-blur-lg shadow-lg shadow-[#0a0a0a40]">
           <h1 className="font-bold text-4xl">Aitch-Pad</h1>
           <p>Where Innovation Takes Flight</p>
-          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
-          <p>Where Innovation Takes Flight</p>
-          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
-          <p>Where Innovation Takes Flight</p>
-          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
-          <p>Where Innovation Takes Flight</p>
-          <h1 className="font-bold text-4xl">Aitch-Pad</h1>
-          <p>Where Innovation Takes Flight</p>
+          <ActiveLaunchpad />
         </div>
         <div className=" w-1/5 py-8 text-center bg-[#ffffff1a] z-10 rounded-lg border-solid border-1 border-[#ffffffc4] backdrop-blur-sm shadow-lg shadow-[#0a0a0a40]">
           <LaunchpadForm />
